@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f5f6;--surface:#ffffff;--surface-alt:#f7f9fa;--surface-hover:#eef1f2;
+  --border:#e1e6e8;--border-strong:#c7ced1;
+  --text:#1b2427;--text-muted:#5c6b6f;--text-faint:#8b9699;
+  --primary:#0f6e6e;--primary-hover:#0b5757;--primary-soft:#e5f2f1;--on-primary:#ffffff;
+  --good-bg:#e6f6ec;--good-text:#187a3b;
+  --warn-bg:#fdf1de;--warn-text:#8a5a0a;
+  --bad-bg:#fbe9e9;--bad-text:#b3261e;
+  --info-bg:#e8f0fb;--info-text:#1d5fae;
+  --shadow:0 1px 2px rgba(16,24,26,.06),0 1px 1px rgba(16,24,26,.04);
+  --shadow-lg:0 16px 40px rgba(16,24,26,.18);
+  --font-ui:'Public Sans',system-ui,sans-serif;--font-mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+[data-theme="dark"]{
+  --bg:#11161a;--surface:#181e23;--surface-alt:#1c2227;--surface-hover:#232b30;
+  --border:#2a3236;--border-strong:#3a444a;
+  --text:#e7edef;--text-muted:#98a5a9;--text-faint:#657176;
+  --primary:#2dd4bf;--primary-hover:#5eead4;--primary-soft:rgba(45,212,191,.14);--on-primary:#06231f;
+  --good-bg:rgba(34,197,94,.16);--good-text:#4ade80;
+  --warn-bg:rgba(245,158,11,.16);--warn-text:#fbbf24;
+  --bad-bg:rgba(248,113,113,.16);--bad-text:#f87171;
+  --info-bg:rgba(59,130,246,.16);--info-text:#60a5fa;
+  --shadow:0 1px 2px rgba(0,0,0,.4);--shadow-lg:0 20px 48px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-ui);}
+input,select,textarea,button{font-family:inherit}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--text-muted) 50%),linear-gradient(135deg,var(--text-muted) 50%,transparent 50%);background-position:calc(100% - 16px) 13px,calc(100% - 11px) 13px;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:28px!important;}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--primary);outline-offset:1px}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:5px}
+::selection{background:var(--primary-soft)}
+@keyframes toastIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+@keyframes modalIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="display:flex;height:100vh;width:100%;background:{{paletteVars.bg}};color:{{paletteVars.text}};font-family:var(--font-ui);overflow:hidden;--bg:{{paletteVars.bg}};--surface:{{paletteVars.surface}};--surface-alt:{{paletteVars.surfaceAlt}};--surface-hover:{{paletteVars.surfaceAlt}};--border:{{paletteVars.border}};--border-strong:{{paletteVars.border}};--text:{{paletteVars.text}};--text-muted:{{paletteVars.textMuted}};--text-faint:{{paletteVars.textMuted}};--primary:{{paletteVars.primary}};--primary-hover:{{paletteVars.primaryHover}};--on-primary:{{paletteVars.onPrimary}};--primary-soft:{{paletteVars.primarySoft}};">
+
+<aside style="width:230px;flex:none;background:var(--surface-alt);border-right:1px solid var(--border);display:flex;flex-direction:column;">
+  <div style="padding:22px 20px 18px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:11px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:30px;height:30px;border-radius:8px;background:var(--primary);color:var(--on-primary);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex:none;">M</div>
+      <div style="font-size:18px;font-weight:800;letter-spacing:-.01em;">MedStock</div>
+    </div>
+    <div style="display:inline-flex;align-self:flex-start;padding:3px 9px;border-radius:100px;background:var(--surface);border:1px solid var(--border);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);">Riverside Clinic</div>
+  </div>
+  <nav style="flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:1px;overflow-y:auto;">
+    <div style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint);padding:0 10px 7px;">Menu</div>
+    <sc-for list="{{navItems}}" as="item" hint-placeholder-count="6">
+      <div onClick="{{item.onClick}}" style="{{item.style}}" style-hover="{{item.hoverStyle}}">
+        <span>{{item.label}}</span>
+        <sc-if value="{{item.badge}}" hint-placeholder-val="{{false}}">
+          <span style="{{item.badgeStyle}}">{{item.badge}}</span>
+        </sc-if>
+      </div>
+    </sc-for>
+  </nav>
+  <div style="padding:14px 16px;">
+    <button onClick="{{openSettings}}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:9px 0;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;">Settings</button>
+  </div>
+  <div style="margin:0 14px 14px;padding:11px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:9px;">
+    <div style="width:30px;height:30px;border-radius:100px;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;flex:none;">{{currentUser.initials}}</div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:12.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{currentUser.name}}</div>
+      <div style="font-size:11px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{currentUser.role}}</div>
+    </div>
+    <button onClick="{{onLogout}}" title="Log out" style="flex:none;padding:5px 9px;border-radius:6px;border:1px solid var(--border);background:var(--surface-alt);color:var(--text-muted);font-size:11.5px;font-weight:600;cursor:pointer;">Log out</button>
+  </div>
+</aside>
+
+<main style="flex:1;overflow-y:auto;min-width:0;">
+  <div style="padding:26px 32px 60px;max-width:1400px;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;">
+      <div>
+        <h1 style="font-size:22px;font-weight:800;margin:0 0 4px;letter-spacing:-.01em;">{{pageTitle}}</h1>
+        <div style="font-size:13px;color:var(--text-muted);">{{pageSubtitle}}</div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <sc-if value="{{secondaryAction}}" hint-placeholder-val="{{false}}">
+          <button onClick="{{secondaryAction.onClick}}" style="padding:9px 16px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;">{{secondaryAction.label}}</button>
+        </sc-if>
+        <sc-if value="{{primaryAction}}" hint-placeholder-val="{{false}}">
+          <button onClick="{{primaryAction.onClick}}" style="padding:9px 16px;border-radius:7px;border:1px solid var(--primary);background:var(--primary);color:var(--on-primary);font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;">{{primaryAction.label}}</button>
+        </sc-if>
+      </div>
+    </div>
+
+    <sc-if value="{{v.dashboard}}" hint-placeholder-val="{{true}}">
+      <sc-if value="{{alertBanner.hasAlerts}}" hint-placeholder-val="{{false}}">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--warn-bg);border:1px solid var(--warn-text);border-radius:9px;padding:13px 18px;margin-bottom:20px;flex-wrap:wrap;">
+          <div style="font-size:13.5px;color:var(--warn-text);font-weight:600;">{{alertBanner.message}}</div>
+          <button onClick="{{alertBanner.onReview}}" style="padding:6px 13px;border-radius:6px;border:1px solid var(--warn-text);background:transparent;color:var(--warn-text);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;">Review expiry alerts</button>
+        </div>
+      </sc-if>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:28px;">
+        <sc-for list="{{stats}}" as="card" hint-placeholder-count="5">
+          <div onClick="{{card.onClick}}" style="cursor:pointer;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 17px;box-shadow:var(--shadow);">
+            <div style="font-size:12px;color:var(--text-muted);font-weight:600;margin-bottom:8px;">{{card.label}}</div>
+            <div style="font-size:26px;font-weight:800;font-family:var(--font-mono);letter-spacing:-.01em;color:{{card.color}};">{{card.value}}</div>
+            <div style="font-size:12px;color:var(--text-faint);margin-top:4px;">{{card.sub}}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px;">Recent activity</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead><tr>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Date</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Medicine</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Type</th>
+            <th style="text-align:right;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Qty</th>
+            <th style="text-align:right;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Price</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Reference</th>
+          </tr></thead>
+          <tbody>
+            <sc-for list="{{recentTxns}}" as="row" hint-placeholder-count="6">
+              <tr>
+                <td style="padding:10px 14px;font-size:12.5px;border-bottom:1px solid var(--border);color:var(--text-muted);font-family:var(--font-mono);">{{row.dateStr}}</td>
+                <td style="padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border);">{{row.medicineName}}</td>
+                <td style="padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border);"><span style="display:inline-flex;padding:3px 9px;border-radius:100px;font-size:11.5px;font-weight:700;background:{{row.type.bg}};color:{{row.type.text}};">{{row.type.label}}</span></td>
+                <td style="padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--font-mono);">{{row.qty}}</td>
+                <td style="padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--font-mono);">{{row.priceStr}}</td>
+                <td style="padding:10px 14px;font-size:12.5px;border-bottom:1px solid var(--border);color:var(--text-muted);">{{row.reference}}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{v.medicines}}" hint-placeholder-val="{{false}}">
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+        <input value="{{medFilters.search}}" onChange="{{setMedSearch}}" placeholder="Search medicines…" style="flex:1;min-width:200px;padding:8px 11px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;"/>
+        <select value="{{medFilters.category}}" onChange="{{setMedCategory}}" style="padding:8px 11px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;">
+          <option value="all">All categories</option>
+          <sc-for list="{{categories}}" as="c" hint-placeholder-count="4"><option value="{{c}}">{{c}}</option></sc-for>
+        </select>
+        <select value="{{medFilters.stockStatus}}" onChange="{{setMedStockStatus}}" style="padding:8px 11px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;">
+          <option value="all">All stock statuses</option>
+          <option value="available">Available</option>
+          <option value="low">Low Stock</option>
+          <option value="out">Out of Stock</option>
+        </select>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;min-width:880px;">
+          <thead><tr>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Name</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Category</th>
+            <th style="text-align:right;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Stock</th>
+            <th style="text-align:right;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Min</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Status</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Expiry</th>
+            <th style="text-align:right;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Actions</th>
+          </tr></thead>
+          <tbody>
+            <sc-for list="{{medRows}}" as="row" hint-placeholder-count="8">
+              <tr>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);font-weight:600;cursor:pointer;" onClick="{{row.onOpen}}">{{row.name}}</td>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);color:var(--text-muted);">{{row.category}}</td>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--font-mono);">{{row.stock}}</td>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--font-mono);color:var(--text-muted);">{{row.minStock}}</td>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);"><span style="display:inline-flex;padding:3px 9px;border-radius:100px;font-size:11.5px;font-weight:700;background:{{row.stockStatus.bg}};color:{{row.stockStatus.text}};">{{row.stockStatus.label}}</span></td>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);"><span style="display:inline-flex;padding:3px 9px;border-radius:100px;font-size:11.5px;font-weight:700;background:{{row.expiryStatus.bg}};color:{{row.expiryStatus.text}};">{{row.expiryStatus.label}}</span></td>
+                <td style="padding:9px 10px;border-bottom:1px solid var(--border);text-align:right;">
+                  <div style="display:flex;gap:4px;justify-content:flex-end;flex-wrap:wrap;">
+                    <button onClick="{{row.onStockIn}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--good-text);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">Stock In</button>
+                    <button onClick="{{row.onStockOut}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--info-text);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">Stock Out</button>
+                    <button onClick="{{row.onOpen}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--primary);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">Batches</button>
+                    <button onClick="{{row.onEdit}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--text-muted);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">Edit</button>
+                    <button onClick="{{row.onArchive}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--text-muted);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">Archive</button>
+                    <button onClick="{{row.onDelete}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--bad-text);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+        <sc-if value="{{medRows.length}}" hint-placeholder-val="{{true}}"></sc-if>
+      </div>
+      <sc-if value="{{medEmpty}}" hint-placeholder-val="{{false}}"><div style="padding:36px;text-align:center;color:var(--text-faint);font-size:13px;">No medicines match these filters.</div></sc-if>
+    </sc-if>
+
+    <sc-if value="{{v.batches}}" hint-placeholder-val="{{false}}">
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+        <input value="{{batchFilters.search}}" onChange="{{setBatchSearch}}" placeholder="Search by medicine or batch #…" style="flex:1;min-width:200px;padding:8px 11px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;"/>
+        <select value="{{batchFilters.expiryStatus}}" onChange="{{setBatchExpiryStatus}}" style="padding:8px 11px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;">
+          <option value="all">All expiry statuses</option>
+          <option value="ok">OK</option>
+          <option value="expiring">Expiring Soon</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;min-width:820px;">
+          <thead><tr>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Medicine</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Batch #</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Expiry</th>
+            <th style="text-align:right;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Stock</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Status</th>
+            <th style="text-align:right;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Actions</th>
+          </tr></thead>
+          <tbody>
+            <sc-for list="{{batchRows}}" as="row" hint-placeholder-count="8">
+              <tr>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);font-weight:600;cursor:pointer;" onClick="{{row.onOpen}}">{{row.medicineName}}</td>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);font-family:var(--font-mono);color:var(--text-muted);">{{row.batchNumber}}</td>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);font-family:var(--font-mono);">{{row.expiry}}</td>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--font-mono);">{{row.stock}}</td>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);"><span style="display:inline-flex;padding:3px 9px;border-radius:100px;font-size:11.5px;font-weight:700;background:{{row.status.bg}};color:{{row.status.text}};">{{row.status.label}}</span></td>
+                <td style="padding:9px 10px;border-bottom:1px solid var(--border);text-align:right;">
+                  <div style="display:flex;gap:4px;justify-content:flex-end;flex-wrap:wrap;">
+                    <button onClick="{{row.onStockIn}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--good-text);font-size:12px;font-weight:700;cursor:pointer;">In</button>
+                    <button onClick="{{row.onStockOut}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--info-text);font-size:12px;font-weight:700;cursor:pointer;">Out</button>
+                    <button onClick="{{row.onWriteOff}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--warn-text);font-size:12px;font-weight:700;cursor:pointer;">Write-off</button>
+                    <button onClick="{{row.onArchive}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--text-muted);font-size:12px;font-weight:700;cursor:pointer;">Archive</button>
+                    <button onClick="{{row.onDelete}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--bad-text);font-size:12px;font-weight:700;cursor:pointer;">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{v.detail}}" hint-placeholder-val="{{false}}">
+      <sc-if value="{{detailMedicine}}" hint-placeholder-val="{{false}}">
+      <button onClick="{{backToMedicines}}" style="background:none;border:none;color:var(--primary);font-size:12.5px;font-weight:700;cursor:pointer;padding:0;margin-bottom:14px;">← All medicines</button>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:22px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;">
+        <div>
+          <div style="font-size:17px;font-weight:800;margin-bottom:4px;">{{detailMedicine.name}}</div>
+          <div style="font-size:12.5px;color:var(--text-muted);">{{detailMedicine.category}} · Min stock {{detailMedicine.minStock}} · Expiry warning {{detailMedicine.warnDays}}d</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <span style="display:inline-flex;padding:4px 11px;border-radius:100px;font-size:12.5px;font-weight:700;background:{{detailMedicine.stockStatus.bg}};color:{{detailMedicine.stockStatus.text}};">{{detailMedicine.stockStatus.label}}</span>
+          <div style="font-size:22px;font-weight:800;font-family:var(--font-mono);">{{detailMedicine.stock}}</div>
+          <button onClick="{{detailMedicine.onEdit}}" style="padding:7px 13px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12.5px;font-weight:600;cursor:pointer;">Edit Medicine</button>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="font-size:14px;font-weight:700;">Batches</div>
+        <button onClick="{{detailMedicine.onAddBatch}}" style="padding:6px 12px;border-radius:6px;border:1px solid var(--primary);background:var(--primary);color:var(--on-primary);font-size:12.5px;font-weight:700;cursor:pointer;">+ Add Batch</button>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:28px;overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;min-width:700px;">
+          <thead><tr>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Batch #</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Expiry</th>
+            <th style="text-align:right;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Stock</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Status</th>
+            <th style="text-align:right;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Actions</th>
+          </tr></thead>
+          <tbody>
+            <sc-for list="{{detailBatches}}" as="row" hint-placeholder-count="3">
+              <tr>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-weight:600;">{{row.batchNumber}}</td>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);font-family:var(--font-mono);">{{row.expiry}}</td>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--font-mono);">{{row.stock}}</td>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);"><span style="display:inline-flex;padding:3px 9px;border-radius:100px;font-size:11.5px;font-weight:700;background:{{row.status.bg}};color:{{row.status.text}};">{{row.status.label}}</span></td>
+                <td style="padding:9px 10px;border-bottom:1px solid var(--border);text-align:right;">
+                  <div style="display:flex;gap:4px;justify-content:flex-end;flex-wrap:wrap;">
+                    <button onClick="{{row.onStockIn}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--good-text);font-size:12px;font-weight:700;cursor:pointer;">In</button>
+                    <button onClick="{{row.onStockOut}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--info-text);font-size:12px;font-weight:700;cursor:pointer;">Out</button>
+                    <button onClick="{{row.onWriteOff}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--warn-text);font-size:12px;font-weight:700;cursor:pointer;">Write-off</button>
+                    <button onClick="{{row.onArchive}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--text-muted);font-size:12px;font-weight:700;cursor:pointer;">Archive</button>
+                    <button onClick="{{row.onDelete}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--bad-text);font-size:12px;font-weight:700;cursor:pointer;">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:10px;">
+        <div style="font-size:14px;font-weight:700;">Transaction history</div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <sc-for list="{{rangeChips}}" as="chip" hint-placeholder-count="5">
+            <button onClick="{{chip.onClick}}" style="{{chip.style}}">{{chip.label}}</button>
+          </sc-for>
+          <button onClick="{{exportDetailCSV}}" style="padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12.5px;font-weight:600;cursor:pointer;margin-left:4px;">Export CSV</button>
+        </div>
+      </div>
+      <sc-if value="{{detailRange.isCustom}}" hint-placeholder-val="{{false}}">
+        <div style="display:flex;gap:10px;margin-bottom:12px;align-items:center;">
+          <input type="date" value="{{detailRange.from}}" onChange="{{setDetailFrom}}" style="padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12.5px;"/>
+          <span style="color:var(--text-faint);font-size:12.5px;">to</span>
+          <input type="date" value="{{detailRange.to}}" onChange="{{setDetailTo}}" style="padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12.5px;"/>
+        </div>
+      </sc-if>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;min-width:700px;">
+          <thead><tr>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Date</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Batch</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Type</th>
+            <th style="text-align:right;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Qty</th>
+            <th style="text-align:right;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Price</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Reference</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Notes</th>
+          </tr></thead>
+          <tbody>
+            <sc-for list="{{detailHistory}}" as="row" hint-placeholder-count="6">
+              <tr>
+                <td style="padding:10px 14px;font-size:12.5px;border-bottom:1px solid var(--border);font-family:var(--font-mono);color:var(--text-muted);">{{row.dateStr}}</td>
+                <td style="padding:10px 14px;font-size:12.5px;border-bottom:1px solid var(--border);font-family:var(--font-mono);">{{row.batchNumber}}</td>
+                <td style="padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border);"><span style="display:inline-flex;padding:3px 9px;border-radius:100px;font-size:11.5px;font-weight:700;background:{{row.type.bg}};color:{{row.type.text}};">{{row.type.label}}</span></td>
+                <td style="padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--font-mono);">{{row.qty}}</td>
+                <td style="padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--font-mono);">{{row.priceStr}}</td>
+                <td style="padding:10px 14px;font-size:12.5px;border-bottom:1px solid var(--border);color:var(--text-muted);">{{row.reference}}</td>
+                <td style="padding:10px 14px;font-size:12.5px;border-bottom:1px solid var(--border);color:var(--text-muted);">{{row.notes}}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+        <sc-if value="{{detailHistoryEmpty}}" hint-placeholder-val="{{false}}"><div style="padding:30px;text-align:center;color:var(--text-faint);font-size:13px;">No transactions in this range.</div></sc-if>
+      </div>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{v.ledger}}" hint-placeholder-val="{{false}}">
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+        <input value="{{ledgerFilters.search}}" onChange="{{setLedgerSearch}}" placeholder="Search medicine, batch, reference…" style="flex:1;min-width:200px;padding:8px 11px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;"/>
+        <select value="{{ledgerFilters.type}}" onChange="{{setLedgerType}}" style="padding:8px 11px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;">
+          <option value="all">All types</option>
+          <option value="IN">Stock In</option>
+          <option value="OUT">Stock Out</option>
+          <option value="WRITEOFF">Write-Off</option>
+        </select>
+        <button onClick="{{exportLedgerCSV}}" style="padding:8px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;">Export CSV</button>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;min-width:900px;">
+          <thead><tr>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Date</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Medicine</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Batch</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Type</th>
+            <th style="text-align:right;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Qty</th>
+            <th style="text-align:right;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Price</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Reference</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Notes</th>
+          </tr></thead>
+          <tbody>
+            <sc-for list="{{ledgerRows}}" as="row" hint-placeholder-count="10">
+              <tr>
+                <td style="padding:10px 14px;font-size:12.5px;border-bottom:1px solid var(--border);font-family:var(--font-mono);color:var(--text-muted);">{{row.dateStr}}</td>
+                <td style="padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border);">{{row.medicineName}}</td>
+                <td style="padding:10px 14px;font-size:12.5px;border-bottom:1px solid var(--border);font-family:var(--font-mono);color:var(--text-muted);">{{row.batchNumber}}</td>
+                <td style="padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border);"><span style="display:inline-flex;padding:3px 9px;border-radius:100px;font-size:11.5px;font-weight:700;background:{{row.type.bg}};color:{{row.type.text}};">{{row.type.label}}</span></td>
+                <td style="padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--font-mono);">{{row.qty}}</td>
+                <td style="padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--font-mono);">{{row.priceStr}}</td>
+                <td style="padding:10px 14px;font-size:12.5px;border-bottom:1px solid var(--border);color:var(--text-muted);">{{row.reference}}</td>
+                <td style="padding:10px 14px;font-size:12.5px;border-bottom:1px solid var(--border);color:var(--text-muted);">{{row.notes}}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{v.archive}}" hint-placeholder-val="{{false}}">
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px;">Archived Medicines</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:26px;overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;min-width:600px;">
+          <thead><tr>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Name</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Category</th>
+            <th style="text-align:right;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Actions</th>
+          </tr></thead>
+          <tbody>
+            <sc-for list="{{archivedMeds}}" as="row" hint-placeholder-count="2">
+              <tr>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);font-weight:600;">{{row.name}}</td>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);color:var(--text-muted);">{{row.category}}</td>
+                <td style="padding:9px 10px;border-bottom:1px solid var(--border);text-align:right;">
+                  <div style="display:flex;gap:4px;justify-content:flex-end;">
+                    <button onClick="{{row.onRestore}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--primary);font-size:12px;font-weight:700;cursor:pointer;">Restore</button>
+                    <button onClick="{{row.onDeleteForever}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--bad-text);font-size:12px;font-weight:700;cursor:pointer;">Delete Forever</button>
+                  </div>
+                </td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+        <sc-if value="{{archivedMedsEmpty}}" hint-placeholder-val="{{false}}"><div style="padding:24px;text-align:center;color:var(--text-faint);font-size:13px;">No archived medicines.</div></sc-if>
+      </div>
+
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px;">Archived Batches</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;min-width:600px;">
+          <thead><tr>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Medicine</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Batch #</th>
+            <th style="text-align:left;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Expiry</th>
+            <th style="text-align:right;padding:9px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);background:var(--surface-alt);">Actions</th>
+          </tr></thead>
+          <tbody>
+            <sc-for list="{{archivedBatches}}" as="row" hint-placeholder-count="2">
+              <tr>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);font-weight:600;">{{row.medicineName}}</td>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);font-family:var(--font-mono);">{{row.batchNumber}}</td>
+                <td style="padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);font-family:var(--font-mono);">{{row.expiry}}</td>
+                <td style="padding:9px 10px;border-bottom:1px solid var(--border);text-align:right;">
+                  <div style="display:flex;gap:4px;justify-content:flex-end;">
+                    <button onClick="{{row.onRestore}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--primary);font-size:12px;font-weight:700;cursor:pointer;">Restore</button>
+                    <button onClick="{{row.onDeleteForever}}" style="padding:4px 8px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--bad-text);font-size:12px;font-weight:700;cursor:pointer;">Delete Forever</button>
+                  </div>
+                </td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+        <sc-if value="{{archivedBatchesEmpty}}" hint-placeholder-val="{{false}}"><div style="padding:24px;text-align:center;color:var(--text-faint);font-size:13px;">No archived batches.</div></sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{v.categories}}" hint-placeholder-val="{{false}}">
+      <div style="display:flex;gap:10px;margin-bottom:20px;">
+        <input value="{{newCategoryName}}" onChange="{{setNewCategoryName}}" placeholder="New category name…" style="flex:1;max-width:280px;padding:8px 11px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;"/>
+        <button onClick="{{addCategoryDirect}}" style="padding:8px 15px;border-radius:6px;border:1px solid var(--primary);background:var(--primary);color:var(--on-primary);font-size:13px;font-weight:700;cursor:pointer;">Add Category</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        <sc-for list="{{categoryRows}}" as="cat" hint-placeholder-count="6">
+          <div style="display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:8px 8px 8px 16px;box-shadow:var(--shadow);">
+            <span style="font-size:13px;font-weight:600;">{{cat.name}}</span>
+            <span style="font-size:11.5px;color:var(--text-muted);font-family:var(--font-mono);">{{cat.count}}</span>
+            <button onClick="{{cat.onRemove}}" style="width:22px;height:22px;border-radius:100px;border:none;background:var(--surface-hover);color:var(--text-muted);font-size:13px;cursor:pointer;line-height:1;">×</button>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+  </div>
+</main>
+
+<div style="position:fixed;top:18px;right:18px;display:flex;flex-direction:column;gap:10px;z-index:1200;">
+  <sc-for list="{{toasts}}" as="t" hint-placeholder-count="0">
+    <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:8px;background:var(--surface);box-shadow:var(--shadow-lg);border:1px solid var(--border);width:320px;animation:toastIn .18s ease;">
+      <div style="width:8px;height:8px;border-radius:100px;margin-top:5px;flex:none;background:{{t.dotColor}};"></div>
+      <div style="flex:1;font-size:13px;color:var(--text);line-height:1.4;">{{t.message}}</div>
+      <button onClick="{{t.onDismiss}}" style="background:none;border:none;color:var(--text-faint);font-size:15px;cursor:pointer;line-height:1;padding:0;">×</button>
+    </div>
+  </sc-for>
+</div>
+
+<sc-if value="{{modal}}" hint-placeholder-val="{{false}}">
+  <div onClick="{{closeModal}}" style="position:fixed;inset:0;background:rgba(10,14,16,.5);display:flex;align-items:center;justify-content:center;z-index:1000;animation:fadeIn .12s ease;">
+    <div onClick="{{stopProp}}" style="background:var(--surface);border-radius:10px;box-shadow:var(--shadow-lg);width:480px;max-width:92vw;max-height:88vh;overflow-y:auto;animation:modalIn .16s ease;">
+
+      <sc-if value="{{modalIsMedicine}}" hint-placeholder-val="{{false}}">
+        <div style="padding:20px 22px;border-bottom:1px solid var(--border);font-size:16px;font-weight:800;">{{modal.title}}</div>
+        <div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:5px;">Medicine name</label>
+            <input value="{{modalForm.name}}" onChange="{{setFormName}}" placeholder="e.g. Paracetamol 500mg" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;"/>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:5px;">Category</label>
+            <select value="{{modalForm.category}}" onChange="{{setFormCategory}}" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;">
+              <sc-for list="{{categories}}" as="c" hint-placeholder-count="4"><option value="{{c}}">{{c}}</option></sc-for>
+            </select>
+          </div>
+          <div style="display:flex;gap:14px;">
+            <div style="flex:1;">
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:5px;">Minimum stock</label>
+              <input type="number" value="{{modalForm.minStock}}" onChange="{{setFormMinStock}}" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;"/>
+            </div>
+            <div style="flex:1;">
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:5px;">Expiry warning (days)</label>
+              <input type="number" value="{{modalForm.warnDays}}" onChange="{{setFormWarnDays}}" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;"/>
+            </div>
+          </div>
+        </div>
+        <div style="padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;">
+          <button onClick="{{closeModal}}" style="padding:8px 15px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>
+          <button onClick="{{submitModal}}" style="padding:8px 16px;border-radius:6px;border:1px solid var(--primary);background:var(--primary);color:var(--on-primary);font-size:13px;font-weight:700;cursor:pointer;">Save</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{modalIsBatch}}" hint-placeholder-val="{{false}}">
+        <div style="padding:20px 22px;border-bottom:1px solid var(--border);font-size:16px;font-weight:800;">Add Batch — {{modal.medicineName}}</div>
+        <div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:5px;">Batch number</label>
+            <input value="{{modalForm.batchNumber}}" onChange="{{setFormBatchNumber}}" placeholder="e.g. B-2026-0142" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;"/>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:5px;">Expiry date</label>
+            <input type="date" value="{{modalForm.expiry}}" onChange="{{setFormExpiry}}" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;"/>
+          </div>
+          <div style="font-size:12px;color:var(--text-faint);">New batches start at 0 stock — use Stock In afterward to record the opening quantity.</div>
+        </div>
+        <div style="padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;">
+          <button onClick="{{closeModal}}" style="padding:8px 15px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>
+          <button onClick="{{submitModal}}" style="padding:8px 16px;border-radius:6px;border:1px solid var(--primary);background:var(--primary);color:var(--on-primary);font-size:13px;font-weight:700;cursor:pointer;">Add Batch</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{modalIsStockTxn}}" hint-placeholder-val="{{false}}">
+        <div style="padding:20px 22px;border-bottom:1px solid var(--border);font-size:16px;font-weight:800;">{{modal.title}}</div>
+        <div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:5px;">Medicine</label>
+            <select value="{{modalForm.medicineId}}" onChange="{{setFormMedicine}}" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;">
+              <option value="">Select medicine…</option>
+              <sc-for list="{{medicineOptions}}" as="m" hint-placeholder-count="4"><option value="{{m.id}}">{{m.name}}</option></sc-for>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:5px;">Batch</label>
+            <select value="{{modalForm.batchId}}" onChange="{{setFormBatch}}" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;">
+              <option value="">Select batch…</option>
+              <sc-for list="{{batchOptionsForForm}}" as="b" hint-placeholder-count="2"><option value="{{b.id}}">{{b.label}}</option></sc-for>
+            </select>
+          </div>
+          <div style="display:flex;gap:14px;">
+            <div style="flex:1;">
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:5px;">Quantity</label>
+              <input type="number" value="{{modalForm.qty}}" onChange="{{setFormQty}}" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;"/>
+            </div>
+            <div style="flex:1;">
+              <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:5px;">{{modal.priceLabel}}</label>
+              <input type="number" value="{{modalForm.price}}" onChange="{{setFormPrice}}" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;"/>
+            </div>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:5px;">Reference</label>
+            <input value="{{modalForm.reference}}" onChange="{{setFormReference}}" placeholder="PO / invoice / sale ref…" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;"/>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:5px;">Notes</label>
+            <textarea value="{{modalForm.notes}}" onChange="{{setFormNotes}}" rows="2" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;resize:vertical;"></textarea>
+          </div>
+        </div>
+        <div style="padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;">
+          <button onClick="{{closeModal}}" style="padding:8px 15px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>
+          <button onClick="{{submitModal}}" style="padding:8px 16px;border-radius:6px;border:1px solid var(--primary);background:var(--primary);color:var(--on-primary);font-size:13px;font-weight:700;cursor:pointer;">{{modal.confirmLabel}}</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{modalIsWriteOff}}" hint-placeholder-val="{{false}}">
+        <div style="padding:20px 22px;border-bottom:1px solid var(--border);font-size:16px;font-weight:800;">Write Off Stock</div>
+        <div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px;">
+          <div style="font-size:12.5px;color:var(--text-muted);">{{modal.batchNumber}} · current stock {{modal.currentStock}}</div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:5px;">Quantity to write off</label>
+            <input type="number" value="{{modalForm.qty}}" onChange="{{setFormQty}}" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;"/>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:5px;">Reason / notes</label>
+            <textarea value="{{modalForm.notes}}" onChange="{{setFormNotes}}" rows="2" placeholder="Damaged, expired, lost…" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;resize:vertical;"></textarea>
+          </div>
+        </div>
+        <div style="padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;">
+          <button onClick="{{closeModal}}" style="padding:8px 15px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>
+          <button onClick="{{submitModal}}" style="padding:8px 16px;border-radius:6px;border:1px solid var(--bad-text);background:var(--bad-text);color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Write Off</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{modalIsConfirm}}" hint-placeholder-val="{{false}}">
+        <div style="padding:22px;">
+          <div style="font-size:16px;font-weight:800;margin-bottom:8px;">{{modal.title}}</div>
+          <div style="font-size:13.5px;color:var(--text-muted);line-height:1.5;">{{modal.message}}</div>
+        </div>
+        <div style="padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;">
+          <button onClick="{{closeModal}}" style="padding:8px 15px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>
+          <button onClick="{{confirmModalAction}}" style="{{modal.confirmBtnStyle}}">{{modal.confirmLabel}}</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{modalIsSettings}}" hint-placeholder-val="{{false}}">
+        <div style="padding:20px 22px;border-bottom:1px solid var(--border);font-size:16px;font-weight:800;">Settings</div>
+        <div style="padding:20px 22px;display:flex;flex-direction:column;gap:20px;">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">Appearance</label>
+            <div style="display:flex;border:1px solid var(--border);border-radius:100px;overflow:hidden;background:var(--surface-alt);width:fit-content;">
+              <button onClick="{{setLight}}" style="{{lightBtnStyle}}">Light</button>
+              <button onClick="{{setDark}}" style="{{darkBtnStyle}}">Dark</button>
+            </div>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">Color palette — Light theme (10 combinations)</label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <sc-for list="{{paletteOptionsLight}}" as="opt" hint-placeholder-count="10">
+                <button onClick="{{opt.onClick}}" title="{{opt.name}}" style="{{opt.swatchStyle}}">
+                  <span style="{{opt.dotStyle}}"></span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">Color palette — Dark theme (10 combinations)</label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <sc-for list="{{paletteOptionsDark}}" as="opt" hint-placeholder-count="10">
+                <button onClick="{{opt.onClick}}" title="{{opt.name}}" style="{{opt.swatchStyle}}">
+                  <span style="{{opt.dotStyle}}"></span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--text-faint);">Preferences are saved to this browser and reapplied next time you open MedStock.</div>
+        </div>
+        <div style="padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;">
+          <button onClick="{{closeModal}}" style="padding:8px 16px;border-radius:6px;border:1px solid var(--primary);background:var(--primary);color:var(--on-primary);font-size:13px;font-weight:700;cursor:pointer;">Done</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{modalIsBlocked}}" hint-placeholder-val="{{false}}">
+        <div style="padding:22px;">
+          <div style="font-size:16px;font-weight:800;margin-bottom:8px;">Can't delete "{{modal.name}}"</div>
+          <div style="font-size:13.5px;color:var(--text-muted);line-height:1.5;">This {{modal.entityLabel}} has transaction history and can't be permanently deleted. Archive it to hide it from active lists — you can permanently delete it later from the Archive view.</div>
+        </div>
+        <div style="padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;">
+          <button onClick="{{closeModal}}" style="padding:8px 15px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>
+          <button onClick="{{confirmModalAction}}" style="padding:8px 16px;border-radius:6px;border:1px solid var(--primary);background:var(--primary);color:var(--on-primary);font-size:13px;font-weight:700;cursor:pointer;">Archive</button>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+</sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+function pad(n){return n<10?'0'+n:''+n;}
+function fmtDate(d){const dt=new Date(d);return dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate());}
+function fmtDateTime(d){const dt=new Date(d);return fmtDate(dt)+' '+pad(dt.getHours())+':'+pad(dt.getMinutes());}
+function addDays(date,n){const d=new Date(date);d.setDate(d.getDate()+n);return d;}
+function daysUntil(dateStr,today){const ms=new Date(dateStr).setHours(0,0,0,0)-new Date(today).setHours(0,0,0,0);return Math.round(ms/86400000);}
+function fmtMoney(n){return '$'+Number(n||0).toFixed(2);}
+const TODAY='2026-09-18';
+const PALETTES_LIGHT=[
+  {key:'teal',name:'Teal / Cool White',vars:{bg:'#f3f6f6',surface:'#ffffff',surfaceAlt:'#eef4f3',border:'#dde8e7',text:'#16211f',textMuted:'#5c7472',primary:'#0f6e6e',primaryHover:'#0b5757',onPrimary:'#ffffff',primarySoft:'#e5f2f1'}},
+  {key:'crimson',name:'Red / Off-White',vars:{bg:'#faf7f5',surface:'#ffffff',surfaceAlt:'#f6f0ee',border:'#ecdedb',text:'#241a18',textMuted:'#7a6560',primary:'#b3261e',primaryHover:'#8f1e18',onPrimary:'#ffffff',primarySoft:'#fbe9e8'}},
+  {key:'indigo',name:'Indigo / Cloud',vars:{bg:'#f5f5fb',surface:'#ffffff',surfaceAlt:'#efeffa',border:'#e0e0f1',text:'#1e1b3a',textMuted:'#6a679a',primary:'#4338ca',primaryHover:'#3730a3',onPrimary:'#ffffff',primarySoft:'#e9e7fb'}},
+  {key:'forest',name:'Forest / Ivory',vars:{bg:'#f8f7f0',surface:'#ffffff',surfaceAlt:'#f1efe2',border:'#e3e0cf',text:'#202318',textMuted:'#6b7259',primary:'#15803d',primaryHover:'#116430',onPrimary:'#ffffff',primarySoft:'#e2f4e8'}},
+  {key:'amber',name:'Amber / Sand',vars:{bg:'#faf6ee',surface:'#ffffff',surfaceAlt:'#f4ecda',border:'#e9dcc0',text:'#2a2013',textMuted:'#857556',primary:'#b45309',primaryHover:'#92400e',onPrimary:'#ffffff',primarySoft:'#fdecd2'}},
+  {key:'slate',name:'Slate / Pure White',vars:{bg:'#f5f6f7',surface:'#ffffff',surfaceAlt:'#eef0f2',border:'#dde1e4',text:'#1a2024',textMuted:'#5f6b71',primary:'#334155',primaryHover:'#1e293b',onPrimary:'#ffffff',primarySoft:'#e6e9ec'}},
+  {key:'rose',name:'Rose / Blush White',vars:{bg:'#fbf5f6',surface:'#ffffff',surfaceAlt:'#f7ebee',border:'#ecd8dd',text:'#29171b',textMuted:'#8a616a',primary:'#be123c',primaryHover:'#9f1239',onPrimary:'#ffffff',primarySoft:'#fce7ea'}},
+  {key:'cyan',name:'Cyan / Mist',vars:{bg:'#f3f8f9',surface:'#ffffff',surfaceAlt:'#e9f3f5',border:'#d8e9ec',text:'#142225',textMuted:'#547278',primary:'#0e7490',primaryHover:'#155e75',onPrimary:'#ffffff',primarySoft:'#e0f2f6'}},
+  {key:'purple',name:'Purple / Lilac White',vars:{bg:'#f8f5fb',surface:'#ffffff',surfaceAlt:'#f0e9f7',border:'#e2d5ef',text:'#241a2e',textMuted:'#7a6690',primary:'#7e22ce',primaryHover:'#6b21a8',onPrimary:'#ffffff',primarySoft:'#f1e6fb'}},
+  {key:'blue',name:'Blue / Frost',vars:{bg:'#f3f6fa',surface:'#ffffff',surfaceAlt:'#eaf0f8',border:'#d9e4f0',text:'#16212e',textMuted:'#55697f',primary:'#1d5fae',primaryHover:'#164a89',onPrimary:'#ffffff',primarySoft:'#e3edf9'}}
+];
+const PALETTES_DARK=[
+  {key:'teal',name:'Teal / Ink',vars:{bg:'#0e1514',surface:'#161f1e',surfaceAlt:'#1b2624',border:'#263433',text:'#e2ecea',textMuted:'#8ba5a2',primary:'#2dd4bf',primaryHover:'#5eead4',onPrimary:'#06231f',primarySoft:'rgba(45,212,191,.14)'}},
+  {key:'crimson',name:'Red / Charcoal',vars:{bg:'#17110f',surface:'#221715',surfaceAlt:'#2a1c19',border:'#3a2723',text:'#f3e6e3',textMuted:'#b08d87',primary:'#f87171',primaryHover:'#fca5a5',onPrimary:'#2c0705',primarySoft:'rgba(248,113,113,.16)'}},
+  {key:'indigo',name:'Indigo / Midnight',vars:{bg:'#12111f',surface:'#181729',surfaceAlt:'#1e1d33',border:'#2b2a48',text:'#e6e4f7',textMuted:'#9694c2',primary:'#818cf8',primaryHover:'#a5b4fc',onPrimary:'#1e1b4b',primarySoft:'rgba(129,140,248,.16)'}},
+  {key:'forest',name:'Forest / Pine Black',vars:{bg:'#0e1510',surface:'#151f17',surfaceAlt:'#1a261c',border:'#263a28',text:'#e3ede4',textMuted:'#85a68e',primary:'#4ade80',primaryHover:'#86efac',onPrimary:'#062712',primarySoft:'rgba(74,222,128,.16)'}},
+  {key:'amber',name:'Amber / Espresso',vars:{bg:'#17130c',surface:'#221c12',surfaceAlt:'#2a2216',border:'#3c301d',text:'#f2e9d8',textMuted:'#b39d78',primary:'#fbbf24',primaryHover:'#fcd34d',onPrimary:'#3a2504',primarySoft:'rgba(251,191,36,.16)'}},
+  {key:'slate',name:'Slate / Graphite',vars:{bg:'#12151a',surface:'#191d23',surfaceAlt:'#1f242b',border:'#2c323a',text:'#e5e9ec',textMuted:'#93a0aa',primary:'#94a3b8',primaryHover:'#cbd5e1',onPrimary:'#0f172a',primarySoft:'rgba(148,163,184,.16)'}},
+  {key:'rose',name:'Rose / Plum Black',vars:{bg:'#170f12',surface:'#221419',surfaceAlt:'#2a181f',border:'#3c202a',text:'#f3e2e7',textMuted:'#b28792',primary:'#fb7185',primaryHover:'#fda4af',onPrimary:'#450a1a',primarySoft:'rgba(251,113,133,.16)'}},
+  {key:'cyan',name:'Cyan / Deep Sea',vars:{bg:'#0c1517',surface:'#131f22',surfaceAlt:'#17262a',border:'#223a3e',text:'#dfeef0',textMuted:'#82a7ac',primary:'#22d3ee',primaryHover:'#67e8f9',onPrimary:'#062a30',primarySoft:'rgba(34,211,238,.16)'}},
+  {key:'purple',name:'Purple / Eggplant',vars:{bg:'#140f1a',surface:'#1c1526',surfaceAlt:'#23192f',border:'#332345',text:'#ece4f6',textMuted:'#a390bd',primary:'#c084fc',primaryHover:'#d8b4fe',onPrimary:'#2e1065',primarySoft:'rgba(192,132,252,.16)'}},
+  {key:'blue',name:'Blue / Deep Navy',vars:{bg:'#0d131c',surface:'#141c28',surfaceAlt:'#19222f',border:'#253346',text:'#e2e9f2',textMuted:'#8496ac',primary:'#60a5fa',primaryHover:'#93c5fd',onPrimary:'#0d2543',primarySoft:'rgba(96,165,250,.16)'}}
+];
+const LS_KEY='medstock_prefs_v2';
+const STOCK_STATUS={
+  available:{key:'available',label:'Available',bg:'var(--good-bg)',text:'var(--good-text)'},
+  low:{key:'low',label:'Low Stock',bg:'var(--warn-bg)',text:'var(--warn-text)'},
+  out:{key:'out',label:'Out of Stock',bg:'var(--bad-bg)',text:'var(--bad-text)'}
+};
+const EXPIRY_STATUS={
+  none:{key:'none',label:'—',bg:'var(--surface-alt)',text:'var(--text-faint)'},
+  ok:{key:'ok',label:'OK',bg:'var(--good-bg)',text:'var(--good-text)'},
+  expiring:{key:'expiring',label:'Expiring Soon',bg:'var(--warn-bg)',text:'var(--warn-text)'},
+  expired:{key:'expired',label:'Expired',bg:'var(--bad-bg)',text:'var(--bad-text)'}
+};
+const TXN_TYPE={
+  IN:{key:'IN',label:'Stock In',bg:'var(--good-bg)',text:'var(--good-text)'},
+  OUT:{key:'OUT',label:'Stock Out',bg:'var(--info-bg)',text:'var(--info-text)'},
+  WRITEOFF:{key:'WRITEOFF',label:'Write-Off',bg:'var(--bad-bg)',text:'var(--bad-text)'}
+};
+
+function buildSeed(){
+  const categories=['Analgesics','Antibiotics','Antihistamines','Cardiovascular','Gastrointestinal','Vitamins & Supplements','Antidiabetic','Dermatological'];
+  const defs=[
+    ['Paracetamol 500mg','Analgesics',200,60,0.4,1.2],['Ibuprofen 400mg','Analgesics',150,60,0.5,1.5],['Diclofenac 50mg','Analgesics',100,45,0.6,1.8],
+    ['Amoxicillin 500mg','Antibiotics',150,90,1.2,3.0],['Azithromycin 250mg','Antibiotics',80,90,2.5,6.0],['Ciprofloxacin 500mg','Antibiotics',100,90,1.8,4.5],['Metronidazole 400mg','Antibiotics',100,90,0.9,2.4],
+    ['Cetirizine 10mg','Antihistamines',100,120,0.3,1.0],['Loratadine 10mg','Antihistamines',80,120,0.35,1.1],['Chlorpheniramine 4mg','Antihistamines',100,120,0.2,0.8],
+    ['Amlodipine 5mg','Cardiovascular',100,90,0.8,2.2],['Atenolol 50mg','Cardiovascular',80,90,0.7,2.0],['Losartan 50mg','Cardiovascular',80,90,1.0,2.6],
+    ['Omeprazole 20mg','Gastrointestinal',120,90,0.9,2.5],['Domperidone 10mg','Gastrointestinal',80,90,0.6,1.8],['ORS Sachets','Gastrointestinal',200,180,0.3,0.9],
+    ['Vitamin C 500mg','Vitamins & Supplements',150,180,0.4,1.2],['Vitamin D3 60000IU','Vitamins & Supplements',60,180,1.5,4.0],['Folic Acid 5mg','Vitamins & Supplements',80,180,0.2,0.7],['Multivitamin Syrup','Vitamins & Supplements',40,120,3.5,8.0],
+    ['Metformin 500mg','Antidiabetic',150,90,0.5,1.5],['Glimepiride 2mg','Antidiabetic',60,90,0.8,2.2],
+    ['Clotrimazole Cream','Dermatological',50,180,1.8,4.5],['Betamethasone Cream','Dermatological',40,180,2.0,5.0],['Silver Sulfadiazine Cream','Dermatological',30,120,3.0,7.5]
+  ];
+  const medicines=[],batches=[],transactions=[];let seq=1;
+  const today=new Date(TODAY);
+  defs.forEach((def,i)=>{
+    const [name,category,minStock,warnDays,cost,sale]=def;
+    const mId='m'+(i+1);
+    const archived=(i===24);
+    medicines.push({id:mId,name,category,minStock,warnDays,archived});
+    const batchCount=(i%3)+1;
+    const statusGroup=i%10;
+    for(let j=0;j<batchCount;j++){
+      const bId=mId+'_b'+(j+1);
+      const expOffsetPattern=(i+j)%7;
+      let expiryDays;
+      if(expOffsetPattern===0) expiryDays=-(15+j*5);
+      else if(expOffsetPattern===1) expiryDays=(10+j*4);
+      else expiryDays=90+(i*13+j*37)%450;
+      const expiry=fmtDate(addDays(today,expiryDays));
+      const batchArchived=(i===5&&j===batchCount-1);
+      batches.push({id:bId,medicineId:mId,batchNumber:'B-'+(2024+j)+'-'+(1000+i*7+j),expiry,archived:batchArchived});
+      let targetStock;
+      if(archived||batchArchived) targetStock=0;
+      else if(statusGroup===0) targetStock=0;
+      else if(statusGroup<=2) targetStock=Math.max(1,Math.round(minStock*0.4/batchCount));
+      else targetStock=Math.round(minStock*(1.6+j*0.5)/batchCount);
+      const sold=Math.round(targetStock*0.6)+(i%4)*3;
+      const openQty=targetStock+sold;
+      const openDate=addDays(today,-(120-(i*3)%100));
+      transactions.push({id:'t'+(seq++),batchId:bId,medicineId:mId,type:'IN',qty:openQty,price:cost,reference:'PO-'+(3000+i*11+j),notes:'Opening stock',date:openDate.toISOString()});
+      if(sold>0){
+        const soldDate=addDays(today,-(40-(i*2)%35));
+        transactions.push({id:'t'+(seq++),batchId:bId,medicineId:mId,type:'OUT',qty:sold,price:sale,reference:'SALE-'+(5000+i*7+j),notes:'',date:soldDate.toISOString()});
+      }
+      if(expOffsetPattern===0&&i%4===0){
+        const woQty=Math.min(3,openQty-sold);
+        if(woQty>0){
+          transactions.push({id:'t'+(seq++),batchId:bId,medicineId:mId,type:'WRITEOFF',qty:woQty,price:0,reference:'',notes:'Damaged in storage',date:addDays(today,-5).toISOString()});
+        }
+      }
+    }
+  });
+  return {categories,medicines,batches,transactions,seq};
+}
+
+class Component extends DCLogic {
+  state=(()=>{const seed=buildSeed();return{
+    theme:'light',paletteKeyLight:'teal',paletteKeyDark:'teal',view:'dashboard',
+    categories:seed.categories,medicines:seed.medicines,batches:seed.batches,transactions:seed.transactions,seq:seed.seq,
+    medFilters:{search:'',category:'all',stockStatus:'all'},
+    batchFilters:{search:'',expiryStatus:'all'},
+    ledgerFilters:{search:'',type:'all'},
+    detailMedicineId:null,detailRange:{key:'30',from:'',to:''},
+    newCategoryName:'',
+    modal:null,modalForm:{},toasts:[],toastSeq:1
+  };})();
+
+  componentDidMount(){
+    try{
+      const raw=localStorage.getItem(LS_KEY);
+      if(raw){
+        const p=JSON.parse(raw);
+        this.setState({theme:p.theme||'light',paletteKeyLight:p.paletteKeyLight||'teal',paletteKeyDark:p.paletteKeyDark||'teal'});
+      }
+    }catch(e){}
+  }
+  savePrefs(patch){
+    try{
+      const next={theme:this.state.theme,paletteKeyLight:this.state.paletteKeyLight,paletteKeyDark:this.state.paletteKeyDark,...patch};
+      localStorage.setItem(LS_KEY,JSON.stringify(next));
+    }catch(e){}
+  }
+  setTheme(t){this.setState({theme:t});this.savePrefs({theme:t});}
+  setPalette(themeKey,paletteKey){
+    if(themeKey==='light'){this.setState({paletteKeyLight:paletteKey});this.savePrefs({paletteKeyLight:paletteKey});}
+    else{this.setState({paletteKeyDark:paletteKey});this.savePrefs({paletteKeyDark:paletteKey});}
+  }
+
+  toast(type,message){
+    const id='tt'+this.state.toastSeq;
+    const dotColor=type==='error'?'var(--bad-text)':type==='success'?'var(--good-text)':'var(--info-text)';
+    this.setState(s=>({toasts:[...s.toasts,{id,message,dotColor,onDismiss:()=>this.removeToast(id)}],toastSeq:s.toastSeq+1}));
+    setTimeout(()=>this.removeToast(id),4500);
+  }
+  removeToast(id){this.setState(s=>({toasts:s.toasts.filter(t=>t.id!==id)}));}
+
+  go(view,extra={}){this.setState({view,modal:null,...extra});}
+
+  batchStock(batchId){
+    return this.state.transactions.filter(t=>t.batchId===batchId).reduce((sum,t)=>{
+      if(t.type==='IN') return sum+t.qty;
+      return sum-t.qty;
+    },0);
+  }
+  medicine(id){return this.state.medicines.find(m=>m.id===id);}
+  batch(id){return this.state.batches.find(b=>b.id===id);}
+  activeBatches(medId){return this.state.batches.filter(b=>b.medicineId===medId&&!b.archived);}
+  medicineStock(medId){return this.activeBatches(medId).reduce((s,b)=>s+this.batchStock(b.id),0);}
+  medicineStockStatus(m){
+    const stock=this.medicineStock(m.id);
+    if(stock<=0) return STOCK_STATUS.out;
+    if(stock<=m.minStock) return STOCK_STATUS.low;
+    return STOCK_STATUS.available;
+  }
+  batchExpiryStatus(batch,medicine){
+    if(batch.archived) return EXPIRY_STATUS.none;
+    const days=daysUntil(batch.expiry,TODAY);
+    if(days<0) return EXPIRY_STATUS.expired;
+    if(days<=medicine.warnDays) return EXPIRY_STATUS.expiring;
+    return EXPIRY_STATUS.ok;
+  }
+  medicineExpiryStatus(m){
+    const active=this.activeBatches(m.id).filter(b=>this.batchStock(b.id)>0);
+    if(active.length===0) return EXPIRY_STATUS.none;
+    let worst=EXPIRY_STATUS.ok;
+    active.forEach(b=>{
+      const st=this.batchExpiryStatus(b,m);
+      if(st.key==='expired') worst=EXPIRY_STATUS.expired;
+      else if(st.key==='expiring'&&worst.key!=='expired') worst=EXPIRY_STATUS.expiring;
+    });
+    return worst;
+  }
+
+  openModal(type,payload={}){
+    let modalForm={};
+    if(type==='addMedicine') modalForm={name:'',category:this.state.categories[0]||'',minStock:'100',warnDays:'90'};
+    if(type==='editMedicine'){const m=payload.medicine;modalForm={name:m.name,category:m.category,minStock:String(m.minStock),warnDays:String(m.warnDays)};}
+    if(type==='addBatch') modalForm={batchNumber:'',expiry:''};
+    if(type==='stockTxn') modalForm={medicineId:payload.medicineId||'',batchId:payload.batchId||'',qty:'',price:'',reference:'',notes:''};
+    if(type==='writeOff') modalForm={qty:'',notes:''};
+    this.setState({modal:{type,...payload},modalForm});
+  }
+  closeModal(){this.setState({modal:null,modalForm:{}});}
+  stopProp(e){e.stopPropagation();}
+
+  submitModal(){
+    const {modal,modalForm}=this.state;
+    if(!modal) return;
+    if(modal.type==='addMedicine'||modal.type==='editMedicine') return this.saveMedicineForm(modal,modalForm);
+    if(modal.type==='addBatch') return this.saveBatchForm(modal,modalForm);
+    if(modal.type==='stockTxn') return this.saveStockTxnForm(modal,modalForm);
+    if(modal.type==='writeOff') return this.saveWriteOffForm(modal,modalForm);
+  }
+
+  saveMedicineForm(modal,form){
+    if(!form.name||!form.name.trim()) return this.toast('error','Medicine name is required.');
+    if(!form.category) return this.toast('error','Select a category.');
+    const minStock=Number(form.minStock),warnDays=Number(form.warnDays);
+    if(!(minStock>=0)) return this.toast('error','Minimum stock must be 0 or more.');
+    if(!(warnDays>0)) return this.toast('error','Expiry warning days must be greater than 0.');
+    if(modal.type==='addMedicine'){
+      const id='m'+this.state.seq;
+      this.setState(s=>({medicines:[...s.medicines,{id,name:form.name.trim(),category:form.category,minStock,warnDays,archived:false}],seq:s.seq+1,modal:null,modalForm:{}}));
+      this.toast('success','Medicine added.');
+    }else{
+      const id=modal.medicine.id;
+      this.setState(s=>({medicines:s.medicines.map(m=>m.id===id?{...m,name:form.name.trim(),category:form.category,minStock,warnDays}:m),modal:null,modalForm:{}}));
+      this.toast('success','Medicine updated.');
+    }
+  }
+
+  saveBatchForm(modal,form){
+    if(!form.batchNumber||!form.batchNumber.trim()) return this.toast('error','Batch number is required.');
+    if(!form.expiry) return this.toast('error','Expiry date is required.');
+    const id=modal.medicineId+'_b'+(this.state.seq);
+    this.setState(s=>({batches:[...s.batches,{id,medicineId:modal.medicineId,batchNumber:form.batchNumber.trim(),expiry:form.expiry,archived:false}],seq:s.seq+1,modal:null,modalForm:{}}));
+    this.toast('success','Batch added.');
+  }
+
+  saveStockTxnForm(modal,form){
+    if(!form.medicineId) return this.toast('error','Select a medicine.');
+    if(!form.batchId) return this.toast('error','Select a batch.');
+    const qty=Number(form.qty);
+    if(!(qty>0)) return this.toast('error','Quantity must be greater than 0.');
+    const price=Number(form.price);
+    if(!(price>=0)) return this.toast('error','Price must be 0 or more.');
+    if(modal.txnType==='OUT'){
+      const stock=this.batchStock(form.batchId);
+      if(qty>stock) return this.toast('error','Quantity exceeds current batch stock ('+stock+').');
+    }
+    const id='t'+this.state.seq;
+    this.setState(s=>({transactions:[...s.transactions,{id,batchId:form.batchId,medicineId:form.medicineId,type:modal.txnType,qty,price,reference:form.reference||'',notes:form.notes||'',date:new Date().toISOString()}],seq:s.seq+1,modal:null,modalForm:{}}));
+    this.toast('success',modal.txnType==='IN'?'Stock in recorded.':'Stock out recorded.');
+  }
+
+  saveWriteOffForm(modal,form){
+    const qty=Number(form.qty);
+    if(!(qty>0)) return this.toast('error','Quantity must be greater than 0.');
+    const stock=this.batchStock(modal.batchId);
+    if(qty>stock) return this.toast('error','Quantity exceeds current batch stock ('+stock+').');
+    const id='t'+this.state.seq;
+    this.setState(s=>({transactions:[...s.transactions,{id,batchId:modal.batchId,medicineId:modal.medicineId,type:'WRITEOFF',qty,price:0,reference:'',notes:form.notes||'',date:new Date().toISOString()}],seq:s.seq+1,modal:null,modalForm:{}}));
+    this.toast('success','Stock written off.');
+  }
+
+  archiveMedicine(id){this.setState(s=>({medicines:s.medicines.map(m=>m.id===id?{...m,archived:true}:m),modal:null}));this.toast('success','Medicine archived.');}
+  restoreMedicine(id){this.setState(s=>({medicines:s.medicines.map(m=>m.id===id?{...m,archived:false}:m)}));this.toast('success','Medicine restored.');}
+  deleteMedicineForever(id){this.setState(s=>({medicines:s.medicines.filter(m=>m.id!==id),batches:s.batches.filter(b=>b.medicineId!==id),transactions:s.transactions.filter(t=>t.medicineId!==id),modal:null}));this.toast('success','Medicine permanently deleted.');}
+  deleteMedicineAttempt(medicine){
+    const hasHistory=this.state.batches.some(b=>b.medicineId===medicine.id);
+    if(hasHistory){
+      this.setState({modal:{type:'blocked',name:medicine.name,entityLabel:'medicine',onArchive:()=>this.archiveMedicine(medicine.id)}});
+    }else{
+      this.setState({modal:{type:'confirm',title:'Delete medicine?',message:'Permanently delete "'+medicine.name+'"? This cannot be undone.',confirmLabel:'Delete',confirmBtnStyle:'padding:8px 16px;border-radius:6px;border:1px solid var(--bad-text);background:var(--bad-text);color:#fff;font-size:13px;font-weight:700;cursor:pointer;',onConfirm:()=>this.deleteMedicineForever(medicine.id)}});
+    }
+  }
+
+  archiveBatch(id){this.setState(s=>({batches:s.batches.map(b=>b.id===id?{...b,archived:true}:b),modal:null}));this.toast('success','Batch archived.');}
+  restoreBatch(id){this.setState(s=>({batches:s.batches.map(b=>b.id===id?{...b,archived:false}:b)}));this.toast('success','Batch restored.');}
+  deleteBatchForever(id){this.setState(s=>({batches:s.batches.filter(b=>b.id!==id),transactions:s.transactions.filter(t=>t.batchId!==id),modal:null}));this.toast('success','Batch permanently deleted.');}
+  deleteBatchAttempt(batch){
+    const hasHistory=this.state.transactions.some(t=>t.batchId===batch.id);
+    if(hasHistory){
+      this.setState({modal:{type:'blocked',name:batch.batchNumber,entityLabel:'batch',onArchive:()=>this.archiveBatch(batch.id)}});
+    }else{
+      this.setState({modal:{type:'confirm',title:'Delete batch?',message:'Permanently delete batch "'+batch.batchNumber+'"? This cannot be undone.',confirmLabel:'Delete',confirmBtnStyle:'padding:8px 16px;border-radius:6px;border:1px solid var(--bad-text);background:var(--bad-text);color:#fff;font-size:13px;font-weight:700;cursor:pointer;',onConfirm:()=>this.deleteBatchForever(batch.id)}});
+    }
+  }
+
+  confirmModalAction(){
+    const modal=this.state.modal;
+    if(!modal) return;
+    if(modal.type==='confirm'&&modal.onConfirm) modal.onConfirm();
+    if(modal.type==='blocked'&&modal.onArchive) modal.onArchive();
+    if(modal.type!=='blocked') this.setState({modal:null});
+  }
+
+  addCategoryDirect(){
+    const name=(this.state.newCategoryName||'').trim();
+    if(!name) return this.toast('error','Enter a category name.');
+    if(this.state.categories.includes(name)) return this.toast('error','Category already exists.');
+    this.setState(s=>({categories:[...s.categories,name],newCategoryName:''}));
+    this.toast('success','Category added.');
+  }
+  removeCategory(name){
+    const used=this.state.medicines.some(m=>m.category===name&&!m.archived);
+    if(used) return this.toast('error','Category is in use — reassign medicines first.');
+    this.setState(s=>({categories:s.categories.filter(c=>c!==name)}));
+    this.toast('success','Category removed.');
+  }
+
+  exportCSV(rows,columns,filename){
+    try{
+      const esc=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+      const header=columns.map(c=>esc(c.label)).join(',');
+      const body=rows.map(r=>columns.map(c=>esc(r[c.key])).join(',')).join('\n');
+      const blob=new Blob([header+'\n'+body],{type:'text/csv'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+      this.toast('success','CSV exported.');
+    }catch(e){this.toast('error','Export failed.');}
+  }
+
+  renderVals(){
+    const s=this.state;
+    const setLight=()=>this.setTheme('light');
+    const setDark=()=>this.setTheme('dark');
+    const paletteList=s.theme==='light'?PALETTES_LIGHT:PALETTES_DARK;
+    const currentPaletteKey=s.theme==='light'?s.paletteKeyLight:s.paletteKeyDark;
+    const currentPaletteVars=(paletteList.find(p=>p.key===currentPaletteKey)||paletteList[0]).vars;
+    const makePaletteOptions=(themeKey,selectedKey)=>(themeKey==='light'?PALETTES_LIGHT:PALETTES_DARK).map(p=>({
+      key:p.key,name:p.name,
+      onClick:()=>this.setPalette(themeKey,p.key),
+      swatchStyle:'width:52px;height:36px;border-radius:8px;background:'+p.vars.bg+';border:2px solid '+(selectedKey===p.key?p.vars.primary:p.vars.border)+';box-shadow:'+(selectedKey===p.key?'0 0 0 2px '+p.vars.primary+' inset':'none')+';cursor:pointer;display:flex;align-items:flex-end;padding:5px;',
+      dotStyle:'width:12px;height:12px;border-radius:100px;background:'+p.vars.primary+';display:block;'
+    }));
+    const activeMedicines=s.medicines.filter(m=>!m.archived);
+    const activeBatchesAll=s.batches.filter(b=>!b.archived);
+    const totalStock=activeMedicines.reduce((sum,m)=>sum+this.medicineStock(m.id),0);
+    const lowOutCount=activeMedicines.filter(m=>this.medicineStockStatus(m).key!=='available').length;
+    const expiringExpiredBatches=activeBatchesAll.filter(b=>{
+      const m=this.medicine(b.medicineId);
+      if(!m||m.archived) return false;
+      if(this.batchStock(b.id)<=0) return false;
+      const st=this.batchExpiryStatus(b,m);
+      return st.key==='expiring'||st.key==='expired';
+    });
+    const navDefs=[
+      ['dashboard','Dashboard',0],['medicines','Medicines',lowOutCount],['batches','Batches',expiringExpiredBatches.length],['ledger','Ledger',0],['categories','Categories',0],['archive','Archive',0]
+    ];
+    const navItems=navDefs.map(([key,label,badgeCount])=>{
+      const active=s.view===key||(key==='medicines'&&s.view==='detail');
+      return {key,label,badge:badgeCount>0?badgeCount:null,
+        badgeStyle:'padding:1px 7px;border-radius:100px;font-size:11px;font-weight:700;background:'+(key==='batches'?'var(--bad-bg)':'var(--warn-bg)')+';color:'+(key==='batches'?'var(--bad-text)':'var(--warn-text)')+';',
+        onClick:()=>this.go(key,key==='medicines'?{medFilters:{search:'',category:'all',stockStatus:'all'}}:key==='batches'?{batchFilters:{search:'',expiryStatus:'all'}}:{}),
+        style:'display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 11px;border-radius:7px;font-size:13.5px;font-weight:600;cursor:pointer;border-left:3px solid '+(active?'var(--primary)':'transparent')+';'+(active?'background:var(--primary-soft);color:var(--primary);':'color:var(--text-muted);background:transparent;'),
+        hoverStyle:active?'':'background:var(--surface-hover);color:var(--text);'};
+    });
+    const expiredCount=expiringExpiredBatches.filter(b=>daysUntil(b.expiry,TODAY)<0).length;
+    const expiringCount=expiringExpiredBatches.length-expiredCount;
+
+    const stats=[
+      {label:'Total Medicines',value:activeMedicines.length,sub:s.categories.length+' categories',color:'var(--text)',onClick:()=>this.go('medicines',{medFilters:{search:'',category:'all',stockStatus:'all'}})},
+      {label:'Total Batches',value:activeBatchesAll.length,sub:'across all medicines',color:'var(--text)',onClick:()=>this.go('batches',{batchFilters:{search:'',expiryStatus:'all'}})},
+      {label:'Total Stock',value:totalStock,sub:'units on hand',color:'var(--text)',onClick:()=>this.go('medicines',{medFilters:{search:'',category:'all',stockStatus:'all'}})},
+      {label:'Low / Out of Stock',value:lowOutCount,sub:'medicines need reorder',color:lowOutCount>0?'var(--warn-text)':'var(--text)',onClick:()=>this.go('medicines',{medFilters:{search:'',category:'all',stockStatus:'low'}})},
+      {label:'Expiring / Expired',value:expiringExpiredBatches.length,sub:expiredCount+' expired · '+expiringCount+' expiring',color:expiringExpiredBatches.length>0?'var(--bad-text)':'var(--text)',onClick:()=>this.go('batches',{batchFilters:{search:'',expiryStatus:'expiring'}})}
+    ];
+    const alertBanner={
+      hasAlerts:expiringExpiredBatches.length>0||lowOutCount>0,
+      message:expiredCount+' batch(es) expired, '+expiringCount+' expiring soon, and '+lowOutCount+' medicine(s) low or out of stock.',
+      onReview:()=>this.go('batches',{batchFilters:{search:'',expiryStatus:'expiring'}})
+    };
+    const recentTxns=[...s.transactions].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8).map(t=>({
+      dateStr:fmtDateTime(t.date),medicineName:(this.medicine(t.medicineId)||{}).name||'—',type:TXN_TYPE[t.type],qty:t.qty,priceStr:fmtMoney(t.price),reference:t.reference||'—'
+    }));
+
+    const setMedSearch=e=>this.setState({medFilters:{...s.medFilters,search:e.target.value}});
+    const setMedCategory=e=>this.setState({medFilters:{...s.medFilters,category:e.target.value}});
+    const setMedStockStatus=e=>this.setState({medFilters:{...s.medFilters,stockStatus:e.target.value}});
+    const medFiltered=activeMedicines.filter(m=>{
+      if(s.medFilters.search&&!m.name.toLowerCase().includes(s.medFilters.search.toLowerCase())) return false;
+      if(s.medFilters.category!=='all'&&m.category!==s.medFilters.category) return false;
+      if(s.medFilters.stockStatus!=='all'&&this.medicineStockStatus(m).key!==s.medFilters.stockStatus) return false;
+      return true;
+    });
+    const medRows=medFiltered.map(m=>({
+      name:m.name,category:m.category,stock:this.medicineStock(m.id),minStock:m.minStock,
+      stockStatus:this.medicineStockStatus(m),expiryStatus:this.medicineExpiryStatus(m),
+      onOpen:()=>this.go('detail',{detailMedicineId:m.id,detailRange:{key:'30',from:'',to:''}}),
+      onEdit:()=>this.openModal('editMedicine',{medicine:m,title:'Edit Medicine'}),
+      onStockIn:()=>this.openModal('stockTxn',{medicineId:m.id,txnType:'IN',title:'Stock In — '+m.name,priceLabel:'Cost Price',confirmLabel:'Add Stock'}),
+      onStockOut:()=>this.openModal('stockTxn',{medicineId:m.id,txnType:'OUT',title:'Stock Out — '+m.name,priceLabel:'Sale Price',confirmLabel:'Remove Stock'}),
+      onArchive:()=>{this.archiveMedicine(m.id);},
+      onDelete:()=>this.deleteMedicineAttempt(m)
+    }));
+
+    const setBatchSearch=e=>this.setState({batchFilters:{...s.batchFilters,search:e.target.value}});
+    const setBatchExpiryStatus=e=>this.setState({batchFilters:{...s.batchFilters,expiryStatus:e.target.value}});
+    const batchFiltered=activeBatchesAll.filter(b=>{
+      const m=this.medicine(b.medicineId);
+      if(!m||m.archived) return false;
+      if(s.batchFilters.search){
+        const q=s.batchFilters.search.toLowerCase();
+        if(!m.name.toLowerCase().includes(q)&&!b.batchNumber.toLowerCase().includes(q)) return false;
+      }
+      if(s.batchFilters.expiryStatus!=='all'&&this.batchExpiryStatus(b,m).key!==s.batchFilters.expiryStatus) return false;
+      return true;
+    });
+    const batchRows=batchFiltered.map(b=>{
+      const m=this.medicine(b.medicineId);
+      return {medicineName:m.name,batchNumber:b.batchNumber,expiry:b.expiry,stock:this.batchStock(b.id),status:this.batchExpiryStatus(b,m),
+        onOpen:()=>this.go('detail',{detailMedicineId:m.id,detailRange:{key:'30',from:'',to:''}}),
+        onStockIn:()=>this.openModal('stockTxn',{medicineId:m.id,batchId:b.id,txnType:'IN',title:'Stock In — '+m.name,priceLabel:'Cost Price',confirmLabel:'Add Stock'}),
+        onStockOut:()=>this.openModal('stockTxn',{medicineId:m.id,batchId:b.id,txnType:'OUT',title:'Stock Out — '+m.name,priceLabel:'Sale Price',confirmLabel:'Remove Stock'}),
+        onWriteOff:()=>this.openModal('writeOff',{medicineId:m.id,batchId:b.id,batchNumber:b.batchNumber,currentStock:this.batchStock(b.id)}),
+        onArchive:()=>this.archiveBatch(b.id),
+        onDelete:()=>this.deleteBatchAttempt(b)};
+    });
+
+    const detailMedicineRaw=s.detailMedicineId?this.medicine(s.detailMedicineId):null;
+    let detailMedicine=null,detailBatches=[],detailHistory=[],detailHistoryEmpty=false;
+    const rangeChips=[];
+    if(detailMedicineRaw){
+      detailMedicine={
+        name:detailMedicineRaw.name,category:detailMedicineRaw.category,minStock:detailMedicineRaw.minStock,warnDays:detailMedicineRaw.warnDays,
+        stock:this.medicineStock(detailMedicineRaw.id),stockStatus:this.medicineStockStatus(detailMedicineRaw),
+        onEdit:()=>this.openModal('editMedicine',{medicine:detailMedicineRaw,title:'Edit Medicine'}),
+        onAddBatch:()=>this.openModal('addBatch',{medicineId:detailMedicineRaw.id,medicineName:detailMedicineRaw.name})
+      };
+      detailBatches=s.batches.filter(b=>b.medicineId===detailMedicineRaw.id&&!b.archived).map(b=>({
+        batchNumber:b.batchNumber,expiry:b.expiry,stock:this.batchStock(b.id),status:this.batchExpiryStatus(b,detailMedicineRaw),
+        onStockIn:()=>this.openModal('stockTxn',{medicineId:detailMedicineRaw.id,batchId:b.id,txnType:'IN',title:'Stock In — '+detailMedicineRaw.name,priceLabel:'Cost Price',confirmLabel:'Add Stock'}),
+        onStockOut:()=>this.openModal('stockTxn',{medicineId:detailMedicineRaw.id,batchId:b.id,txnType:'OUT',title:'Stock Out — '+detailMedicineRaw.name,priceLabel:'Sale Price',confirmLabel:'Remove Stock'}),
+        onWriteOff:()=>this.openModal('writeOff',{medicineId:detailMedicineRaw.id,batchId:b.id,batchNumber:b.batchNumber,currentStock:this.batchStock(b.id)}),
+        onArchive:()=>this.archiveBatch(b.id),
+        onDelete:()=>this.deleteBatchAttempt(b)
+      }));
+      const chipDefs=[['7','7d'],['30','30d'],['90','90d'],['365','1y'],['custom','Custom']];
+      chipDefs.forEach(([key,label])=>{
+        const active=s.detailRange.key===key;
+        rangeChips.push({label,onClick:()=>this.setState({detailRange:{...s.detailRange,key}}),
+          style:'padding:5px 12px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid '+(active?'var(--primary)':'var(--border)')+';background:'+(active?'var(--primary-soft)':'var(--surface)')+';color:'+(active?'var(--primary)':'var(--text-muted)')+';'});
+      });
+      let fromDate=null,toDate=new Date(TODAY);
+      if(s.detailRange.key==='custom'){
+        if(s.detailRange.from) fromDate=new Date(s.detailRange.from);
+        if(s.detailRange.to) toDate=new Date(s.detailRange.to);
+      }else{
+        fromDate=addDays(new Date(TODAY),-Number(s.detailRange.key));
+      }
+      detailHistory=s.transactions.filter(t=>t.medicineId===detailMedicineRaw.id).filter(t=>{
+        const d=new Date(t.date);
+        if(fromDate&&d<fromDate) return false;
+        if(toDate&&d>addDays(toDate,1)) return false;
+        return true;
+      }).sort((a,b)=>new Date(b.date)-new Date(a.date)).map(t=>({
+        dateStr:fmtDateTime(t.date),batchNumber:(this.batch(t.batchId)||{}).batchNumber||'—',type:TXN_TYPE[t.type],qty:t.qty,priceStr:fmtMoney(t.price),reference:t.reference||'—',notes:t.notes||''
+      }));
+      detailHistoryEmpty=detailHistory.length===0;
+    }
+    const detailRange={isCustom:s.detailRange.key==='custom',from:s.detailRange.from,to:s.detailRange.to};
+    const setDetailFrom=e=>this.setState({detailRange:{...s.detailRange,from:e.target.value}});
+    const setDetailTo=e=>this.setState({detailRange:{...s.detailRange,to:e.target.value}});
+    const exportDetailCSV=()=>this.exportCSV(detailHistory,[{key:'dateStr',label:'Date'},{key:'batchNumber',label:'Batch'},{key:'qty',label:'Qty'},{key:'priceStr',label:'Price'},{key:'reference',label:'Reference'},{key:'notes',label:'Notes'}],(detailMedicineRaw?detailMedicineRaw.name:'history')+'-history.csv');
+
+    const setLedgerSearch=e=>this.setState({ledgerFilters:{...s.ledgerFilters,search:e.target.value}});
+    const setLedgerType=e=>this.setState({ledgerFilters:{...s.ledgerFilters,type:e.target.value}});
+    const ledgerFiltered=s.transactions.filter(t=>{
+      const m=this.medicine(t.medicineId),b=this.batch(t.batchId);
+      if(s.ledgerFilters.type!=='all'&&t.type!==s.ledgerFilters.type) return false;
+      if(s.ledgerFilters.search){
+        const q=s.ledgerFilters.search.toLowerCase();
+        const hay=((m&&m.name)||'')+' '+((b&&b.batchNumber)||'')+' '+(t.reference||'');
+        if(!hay.toLowerCase().includes(q)) return false;
+      }
+      return true;
+    }).sort((a,b)=>new Date(b.date)-new Date(a.date));
+    const ledgerRows=ledgerFiltered.map(t=>({
+      dateStr:fmtDateTime(t.date),medicineName:(this.medicine(t.medicineId)||{}).name||'—',batchNumber:(this.batch(t.batchId)||{}).batchNumber||'—',
+      type:TXN_TYPE[t.type],qty:t.qty,priceStr:fmtMoney(t.price),reference:t.reference||'—',notes:t.notes||''
+    }));
+    const exportLedgerCSV=()=>this.exportCSV(ledgerRows,[{key:'dateStr',label:'Date'},{key:'medicineName',label:'Medicine'},{key:'batchNumber',label:'Batch'},{key:'qty',label:'Qty'},{key:'priceStr',label:'Price'},{key:'reference',label:'Reference'},{key:'notes',label:'Notes'}],'ledger.csv');
+
+    const archivedMeds=s.medicines.filter(m=>m.archived).map(m=>({name:m.name,category:m.category,onRestore:()=>this.restoreMedicine(m.id),onDeleteForever:()=>this.setState({modal:{type:'confirm',title:'Delete forever?',message:'Permanently delete "'+m.name+'" and all its batches and transaction history? This cannot be undone.',confirmLabel:'Delete Forever',confirmBtnStyle:'padding:8px 16px;border-radius:6px;border:1px solid var(--bad-text);background:var(--bad-text);color:#fff;font-size:13px;font-weight:700;cursor:pointer;',onConfirm:()=>this.deleteMedicineForever(m.id)}})}));
+    const archivedBatches=s.batches.filter(b=>b.archived).map(b=>{const m=this.medicine(b.medicineId);return {medicineName:m?m.name:'—',batchNumber:b.batchNumber,expiry:b.expiry,onRestore:()=>this.restoreBatch(b.id),onDeleteForever:()=>this.setState({modal:{type:'confirm',title:'Delete forever?',message:'Permanently delete batch "'+b.batchNumber+'" and its transaction history? This cannot be undone.',confirmLabel:'Delete Forever',confirmBtnStyle:'padding:8px 16px;border-radius:6px;border:1px solid var(--bad-text);background:var(--bad-text);color:#fff;font-size:13px;font-weight:700;cursor:pointer;',onConfirm:()=>this.deleteBatchForever(b.id)}})};});
+
+    const categoryRows=s.categories.map(c=>({name:c,count:s.medicines.filter(m=>m.category===c&&!m.archived).length,onRemove:()=>this.removeCategory(c)}));
+
+    const medicineOptions=activeMedicines.map(m=>({id:m.id,name:m.name})).sort((a,b)=>a.name.localeCompare(b.name));
+    const batchOptionsForForm=s.modalForm.medicineId?this.activeBatches(s.modalForm.medicineId).map(b=>({id:b.id,label:b.batchNumber+' · exp '+b.expiry+' · stock '+this.batchStock(b.id)})):[];
+
+    const modal=s.modal;
+    const modalIsMedicine=!!modal&&(modal.type==='addMedicine'||modal.type==='editMedicine');
+    const modalIsBatch=!!modal&&modal.type==='addBatch';
+    const modalIsStockTxn=!!modal&&modal.type==='stockTxn';
+    const modalIsWriteOff=!!modal&&modal.type==='writeOff';
+    const modalIsConfirm=!!modal&&modal.type==='confirm';
+    const modalIsBlocked=!!modal&&modal.type==='blocked';
+    const modalIsSettings=!!modal&&modal.type==='settings';
+
+    const setFormName=e=>this.setState({modalForm:{...s.modalForm,name:e.target.value}});
+    const setFormCategory=e=>this.setState({modalForm:{...s.modalForm,category:e.target.value}});
+    const setFormMinStock=e=>this.setState({modalForm:{...s.modalForm,minStock:e.target.value}});
+    const setFormWarnDays=e=>this.setState({modalForm:{...s.modalForm,warnDays:e.target.value}});
+    const setFormBatchNumber=e=>this.setState({modalForm:{...s.modalForm,batchNumber:e.target.value}});
+    const setFormExpiry=e=>this.setState({modalForm:{...s.modalForm,expiry:e.target.value}});
+    const setFormMedicine=e=>this.setState({modalForm:{...s.modalForm,medicineId:e.target.value,batchId:''}});
+    const setFormBatch=e=>this.setState({modalForm:{...s.modalForm,batchId:e.target.value}});
+    const setFormQty=e=>this.setState({modalForm:{...s.modalForm,qty:e.target.value}});
+    const setFormPrice=e=>this.setState({modalForm:{...s.modalForm,price:e.target.value}});
+    const setFormReference=e=>this.setState({modalForm:{...s.modalForm,reference:e.target.value}});
+    const setFormNotes=e=>this.setState({modalForm:{...s.modalForm,notes:e.target.value}});
+
+    const v={dashboard:s.view==='dashboard',medicines:s.view==='medicines',batches:s.view==='batches',detail:s.view==='detail',ledger:s.view==='ledger',archive:s.view==='archive',categories:s.view==='categories'};
+    const titles={dashboard:['Dashboard','Overview of stock, batches and expiry'],medicines:['Medicines','Search, filter, and manage medicine records'],batches:['Batches','All batches across every medicine'],detail:['Medicine Detail','Batches and transaction history'],ledger:['Transaction Ledger','Every stock movement, clinic-wide'],archive:['Archive','Restore or permanently delete archived records'],categories:['Categories','Manage medicine categories']};
+    const [pageTitle,pageSubtitle]=titles[s.view]||titles.dashboard;
+    let primaryAction=null;
+    let secondaryAction=null;
+    if(v.dashboard){
+      primaryAction={label:'+ Stock In',onClick:()=>this.openModal('stockTxn',{txnType:'IN',title:'Stock In',priceLabel:'Cost Price',confirmLabel:'Add Stock'})};
+      secondaryAction={label:'+ Stock Out',onClick:()=>this.openModal('stockTxn',{txnType:'OUT',title:'Stock Out',priceLabel:'Sale Price',confirmLabel:'Remove Stock'})};
+    }
+    if(v.medicines) primaryAction={label:'+ Add Medicine',onClick:()=>this.openModal('addMedicine',{title:'Add Medicine'})};
+    if(v.ledger){
+      primaryAction={label:'+ Stock In',onClick:()=>this.openModal('stockTxn',{txnType:'IN',title:'Stock In',priceLabel:'Cost Price',confirmLabel:'Add Stock'})};
+      secondaryAction={label:'+ Stock Out',onClick:()=>this.openModal('stockTxn',{txnType:'OUT',title:'Stock Out',priceLabel:'Sale Price',confirmLabel:'Remove Stock'})};
+    }
+
+    return {
+      theme:s.theme,setLight,setDark,
+      paletteVars:currentPaletteVars,
+      paletteOptionsLight:makePaletteOptions('light',s.paletteKeyLight),
+      paletteOptionsDark:makePaletteOptions('dark',s.paletteKeyDark),
+      openSettings:()=>this.setState({modal:{type:'settings'}}),
+      currentUser:{name:'Priya Nair',role:'Pharmacy Staff',initials:'PN'},
+      onLogout:()=>this.toast('info','Logged out (demo only — no auth in this prototype).'),
+      lightBtnStyle:'flex:1;padding:6px 14px;white-space:nowrap;border:none;background:'+(s.theme==='light'?'var(--primary)':'var(--surface)')+';color:'+(s.theme==='light'?'var(--on-primary)':'var(--text-muted)')+';font-size:12px;font-weight:700;cursor:pointer;',
+      darkBtnStyle:'flex:1;padding:6px 14px;white-space:nowrap;border:none;background:'+(s.theme==='dark'?'var(--primary)':'var(--surface)')+';color:'+(s.theme==='dark'?'var(--on-primary)':'var(--text-muted)')+';font-size:12px;font-weight:700;cursor:pointer;',
+      navItems,pageTitle,pageSubtitle,primaryAction,secondaryAction,v,
+      stats,alertBanner,recentTxns,
+      medFilters:s.medFilters,setMedSearch,setMedCategory,setMedStockStatus,categories:s.categories,medRows,medEmpty:medRows.length===0,
+      batchFilters:s.batchFilters,setBatchSearch,setBatchExpiryStatus,batchRows,
+      backToMedicines:()=>this.go('medicines'),
+      detailMedicine,detailBatches,detailHistory,detailHistoryEmpty,rangeChips,detailRange,setDetailFrom,setDetailTo,exportDetailCSV,
+      ledgerFilters:s.ledgerFilters,setLedgerSearch,setLedgerType,ledgerRows,exportLedgerCSV,
+      archivedMeds,archivedMedsEmpty:archivedMeds.length===0,archivedBatches,archivedBatchesEmpty:archivedBatches.length===0,
+      newCategoryName:s.newCategoryName,setNewCategoryName:e=>this.setState({newCategoryName:e.target.value}),addCategoryDirect:()=>this.addCategoryDirect(),categoryRows,
+      toasts:s.toasts,
+      modal,modalForm:s.modalForm,modalIsMedicine,modalIsBatch,modalIsStockTxn,modalIsWriteOff,modalIsConfirm,modalIsBlocked,modalIsSettings,
+      medicineOptions,batchOptionsForForm,
+      closeModal:()=>this.closeModal(),stopProp:this.stopProp,submitModal:()=>this.submitModal(),confirmModalAction:()=>this.confirmModalAction(),
+      setFormName,setFormCategory,setFormMinStock,setFormWarnDays,setFormBatchNumber,setFormExpiry,setFormMedicine,setFormBatch,setFormQty,setFormPrice,setFormReference,setFormNotes
+    };
+  }
+}
+</script>
+</body>
+</html>
