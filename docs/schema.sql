@@ -79,17 +79,24 @@ create unique index batches_active_medicine_batch_key
 -- as expired/damaged/lost rather than dispensed — keeps reporting honest.
 create type public.transaction_type as enum ('IN', 'OUT', 'WRITE_OFF');
 
+-- Price is recorded both per-unit and as the transaction total. Staff can
+-- enter either one (per-unit price is the default entry mode in the UI) and
+-- the app computes and stores the other at insert time, so both are always
+-- present and exact — never recomputed later from quantity, which would
+-- drift if quantity math ever changed. WRITE_OFF sets none of the four.
 create table public.transactions (
-  id          uuid primary key default gen_random_uuid(),
-  batch_id    uuid not null references public.batches(id) on delete restrict,
-  type        public.transaction_type not null,
-  quantity    integer not null check (quantity > 0),
-  cost_price  numeric(10,2) check (cost_price >= 0),
-  sale_price  numeric(10,2) check (sale_price >= 0),
-  reference   text,
-  notes       text,
-  created_at  timestamptz not null default now(),
-  created_by  uuid not null references auth.users(id)
+  id                uuid primary key default gen_random_uuid(),
+  batch_id          uuid not null references public.batches(id) on delete restrict,
+  type              public.transaction_type not null,
+  quantity          integer not null check (quantity > 0),
+  unit_cost_price   numeric(10,2) check (unit_cost_price >= 0),
+  total_cost_price  numeric(10,2) check (total_cost_price >= 0),
+  unit_sale_price   numeric(10,2) check (unit_sale_price >= 0),
+  total_sale_price  numeric(10,2) check (total_sale_price >= 0),
+  reference         text,
+  notes             text,
+  created_at        timestamptz not null default now(),
+  created_by        uuid not null references auth.users(id)
 );
 
 

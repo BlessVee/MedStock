@@ -69,11 +69,6 @@ export async function medicineHasBatches(id: string): Promise<boolean> {
   return (count ?? 0) > 0;
 }
 
-export async function deleteMedicineDirect(id: string): Promise<void> {
-  const { error } = await supabase.from('medicines').delete().eq('id', id);
-  if (error) throw error;
-}
-
 export async function hardDeleteMedicine(id: string): Promise<void> {
   const { error } = await supabase.rpc('hard_delete_medicine', { p_medicine_id: id });
   if (error) throw error;

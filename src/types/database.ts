@@ -42,8 +42,10 @@ export interface Transaction {
   batch_id: string;
   type: TransactionType;
   quantity: number;
-  cost_price: number | null;
-  sale_price: number | null;
+  unit_cost_price: number | null;
+  total_cost_price: number | null;
+  unit_sale_price: number | null;
+  total_sale_price: number | null;
   reference: string | null;
   notes: string | null;
   created_at: string;

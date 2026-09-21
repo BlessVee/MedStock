@@ -7,7 +7,6 @@ import {
   activeBatchNumberCollision,
   archiveBatch,
   batchHasTransactions,
-  deleteBatchDirect,
   hardDeleteBatch,
   restoreBatch,
 } from '../services/batches';
@@ -85,7 +84,10 @@ export function useBatchActions() {
         danger: true,
       });
       if (!ok) return;
-      await deleteBatchDirect(batch.id);
+      // No transaction history to cascade, but batches carries no delete
+      // grant (only the security-definer RPC can remove rows) — same call
+      // as deleteForever, just with nothing for it to clean up first.
+      await hardDeleteBatch(batch.id);
       toast('success', 'Batch deleted.');
       await refetch();
     } catch (err) {

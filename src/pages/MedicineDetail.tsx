@@ -81,7 +81,8 @@ export function MedicineDetail() {
       .map((t) => ({
         ...t,
         batchNumber: batchNumberById.get(t.batch_id) ?? '—',
-        price: t.type === 'IN' ? t.cost_price : t.sale_price,
+        unitPrice: t.type === 'IN' ? t.unit_cost_price : t.unit_sale_price,
+        totalPrice: t.type === 'IN' ? t.total_cost_price : t.total_sale_price,
       }));
   }, [transactions, rangeKey, customFrom, customTo, batchNumberById]);
 
@@ -100,7 +101,8 @@ export function MedicineDetail() {
         batch: h.batchNumber,
         type: TXN_TYPE[h.type].label,
         qty: h.quantity,
-        price: fmtMoney(h.price),
+        unitPrice: fmtMoney(h.unitPrice),
+        totalPrice: fmtMoney(h.totalPrice),
         reference: h.reference ?? '—',
         notes: h.notes ?? '',
       })),
@@ -109,7 +111,8 @@ export function MedicineDetail() {
         { key: 'batch', label: 'Batch' },
         { key: 'type', label: 'Type' },
         { key: 'qty', label: 'Qty' },
-        { key: 'price', label: 'Price' },
+        { key: 'unitPrice', label: 'Unit Price' },
+        { key: 'totalPrice', label: 'Total Price' },
         { key: 'reference', label: 'Reference' },
         { key: 'notes', label: 'Notes' },
       ],
@@ -326,14 +329,15 @@ export function MedicineDetail() {
         </div>
       )}
       <div className="card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
-        <table className="data-table" style={{ minWidth: 700 }}>
+        <table className="data-table" style={{ minWidth: 820 }}>
           <thead>
             <tr>
               <th>Date</th>
               <th>Batch</th>
               <th>Type</th>
               <th className="num">Qty</th>
-              <th className="num">Price</th>
+              <th className="num">Unit Price</th>
+              <th className="num">Total Price</th>
               <th>Reference</th>
               <th>Notes</th>
             </tr>
@@ -351,7 +355,8 @@ export function MedicineDetail() {
                     </span>
                   </td>
                   <td className="num mono">{h.quantity}</td>
-                  <td className="num mono">{fmtMoney(h.price)}</td>
+                  <td className="num mono">{fmtMoney(h.unitPrice)}</td>
+                  <td className="num mono">{fmtMoney(h.totalPrice)}</td>
                   <td className="muted">{h.reference ?? '—'}</td>
                   <td className="muted">{h.notes ?? ''}</td>
                 </tr>

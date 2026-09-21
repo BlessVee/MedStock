@@ -6,6 +6,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import { StockTxnModal } from '../components/StockTxnModal';
 import { WriteOffModal } from '../components/WriteOffModal';
 import { BlockedDeleteModal } from '../components/BlockedDeleteModal';
+import { BatchFormModal } from '../components/BatchFormModal';
 import { useBatchActions } from '../hooks/useBatchActions';
 import { exportCSV } from '../utils/csv';
 import type { Batch } from '../types/database';
@@ -23,6 +24,7 @@ export function Batches() {
   const [expiryStatus, setExpiryStatus] = useState(searchParams.get('expiryStatus') ?? 'all');
   const [txnModal, setTxnModal] = useState<TxnModalState>(null);
   const [writeOff, setWriteOff] = useState<WriteOffState>(null);
+  const [addingBatch, setAddingBatch] = useState(false);
 
   const rows = useMemo(() => {
     return activeBatches
@@ -76,6 +78,7 @@ export function Batches() {
       <PageHeader
         title="Batches"
         subtitle="All batches across every medicine"
+        primaryAction={{ label: '+ Add Batch', onClick: () => setAddingBatch(true) }}
         secondaryAction={{ label: 'Export CSV', onClick: handleExport }}
       />
 
@@ -208,6 +211,7 @@ export function Batches() {
           onClose={closeBlocked}
         />
       )}
+      {addingBatch && <BatchFormModal onClose={() => setAddingBatch(false)} />}
     </div>
   );
 }

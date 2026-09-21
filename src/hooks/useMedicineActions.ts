@@ -6,7 +6,6 @@ import { friendlyError } from '../lib/errors';
 import {
   activeNameCollision,
   archiveMedicine,
-  deleteMedicineDirect,
   hardDeleteMedicine,
   medicineHasBatches,
   restoreMedicine,
@@ -71,7 +70,10 @@ export function useMedicineActions() {
         danger: true,
       });
       if (!ok) return;
-      await deleteMedicineDirect(medicine.id);
+      // No batches to cascade, but medicines carries no delete grant (only
+      // the security-definer RPC can remove rows) — same call as
+      // deleteForever, just with nothing for it to clean up first.
+      await hardDeleteMedicine(medicine.id);
       toast('success', 'Medicine deleted.');
       await refetch();
     } catch (err) {

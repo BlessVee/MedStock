@@ -138,22 +138,24 @@ export function Dashboard() {
       </div>
 
       <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10 }}>Recent activity</div>
-      <div className="card" style={{ overflow: 'hidden' }}>
-        <table className="data-table">
+      <div className="card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
+        <table className="data-table" style={{ minWidth: 760 }}>
           <thead>
             <tr>
               <th>Date</th>
               <th>Medicine</th>
               <th>Type</th>
               <th className="num">Qty</th>
-              <th className="num">Price</th>
+              <th className="num">Unit Price</th>
+              <th className="num">Total Price</th>
               <th>Reference</th>
             </tr>
           </thead>
           <tbody>
             {recent.map((t) => {
               const type = TXN_TYPE[t.type];
-              const price = t.type === 'IN' ? t.cost_price : t.sale_price;
+              const unitPrice = t.type === 'IN' ? t.unit_cost_price : t.unit_sale_price;
+              const totalPrice = t.type === 'IN' ? t.total_cost_price : t.total_sale_price;
               return (
                 <tr key={t.id}>
                   <td className="mono muted">{fmtDateTime(t.created_at)}</td>
@@ -164,7 +166,8 @@ export function Dashboard() {
                     </span>
                   </td>
                   <td className="num mono">{t.quantity}</td>
-                  <td className="num mono">{fmtMoney(price)}</td>
+                  <td className="num mono">{fmtMoney(unitPrice)}</td>
+                  <td className="num mono">{fmtMoney(totalPrice)}</td>
                   <td className="muted">{t.reference ?? '—'}</td>
                 </tr>
               );

@@ -1,8 +1,14 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { Modal } from './Modal';
+import { BatchFormModal } from './BatchFormModal';
 import { useData } from '../context/DataContext';
 import { useToast } from '../context/ToastContext';
-import { createStockTransaction } from '../services/transactions';
+import {
+  createStockTransaction,
+  deriveUnitAndTotal,
+  type PriceEntryMode,
+} from '../services/transactions';
+import { fmtMoney } from '../utils/format';
 import { friendlyError } from '../lib/errors';
 
 interface Props {
@@ -24,10 +30,12 @@ export function StockTxnModal({
   const [medicineId, setMedicineId] = useState(initialMedicineId ?? '');
   const [batchId, setBatchId] = useState(initialBatchId ?? '');
   const [qty, setQty] = useState('');
+  const [priceMode, setPriceMode] = useState<PriceEntryMode>('unit');
   const [price, setPrice] = useState('');
   const [reference, setReference] = useState('');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [addingBatch, setAddingBatch] = useState(false);
 
   const medicine = medicineById(medicineId);
   const batchOptions = useMemo(
@@ -41,7 +49,17 @@ export function StockTxnModal({
     : isIn
       ? 'Stock In'
       : 'Stock Out';
-  const priceLabel = isIn ? 'Cost Price' : 'Sale Price';
+  const priceKind = isIn ? 'Cost Price' : 'Sale Price';
+
+  const quantityNum = Number(qty);
+  const priceNum = Number(price);
+  const derivedPreview =
+    Number.isFinite(quantityNum) &&
+    quantityNum > 0 &&
+    Number.isFinite(priceNum) &&
+    price.trim() !== ''
+      ? deriveUnitAndTotal(priceMode, priceNum, quantityNum)
+      : null;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -50,8 +68,8 @@ export function StockTxnModal({
     const quantity = Number(qty);
     if (!Number.isFinite(quantity) || quantity <= 0)
       return toast('error', 'Quantity must be greater than 0.');
-    const priceNum = Number(price);
-    if (!Number.isFinite(priceNum) || priceNum < 0)
+    const priceValue = Number(price);
+    if (!Number.isFinite(priceValue) || priceValue < 0)
       return toast('error', 'Price must be 0 or more.');
     if (!isIn) {
       const stock = batchStock(batchId);
@@ -65,7 +83,8 @@ export function StockTxnModal({
         batch_id: batchId,
         type: txnType,
         quantity,
-        price: priceNum,
+        priceMode,
+        priceValue,
         reference: reference.trim(),
         notes: notes.trim(),
       });
@@ -114,7 +133,28 @@ export function StockTxnModal({
             </select>
           </div>
           <div className="field">
-            <label htmlFor="txn-batch">Batch</label>
+            <div
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}
+            >
+              <label htmlFor="txn-batch">Batch</label>
+              {medicineId && !initialBatchId && (
+                <button
+                  type="button"
+                  onClick={() => setAddingBatch(true)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--primary)',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    padding: 0,
+                  }}
+                >
+                  + Add new batch
+                </button>
+              )}
+            </div>
             <select
               id="txn-batch"
               className="input"
@@ -129,6 +169,11 @@ export function StockTxnModal({
                 </option>
               ))}
             </select>
+            {medicineId && batchOptions.length === 0 && (
+              <div className="faint" style={{ fontSize: 12 }}>
+                No active batches for this medicine yet — add one to continue.
+              </div>
+            )}
           </div>
           <div style={{ display: 'flex', gap: 14 }}>
             <div className="field" style={{ flex: 1 }}>
@@ -142,7 +187,35 @@ export function StockTxnModal({
               />
             </div>
             <div className="field" style={{ flex: 1 }}>
-              <label htmlFor="txn-price">{priceLabel}</label>
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}
+              >
+                <label htmlFor="txn-price">{priceKind}</label>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  {(['unit', 'total'] as const).map((mode) => {
+                    const active = priceMode === mode;
+                    return (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => setPriceMode(mode)}
+                        style={{
+                          padding: '2px 8px',
+                          borderRadius: 100,
+                          fontSize: 11,
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          border: `1px solid ${active ? 'var(--primary)' : 'var(--border)'}`,
+                          background: active ? 'var(--primary-soft)' : 'var(--surface)',
+                          color: active ? 'var(--primary)' : 'var(--text-muted)',
+                        }}
+                      >
+                        {mode === 'unit' ? 'Per unit' : 'Total'}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
               <input
                 id="txn-price"
                 type="number"
@@ -150,6 +223,13 @@ export function StockTxnModal({
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
               />
+              {derivedPreview && (
+                <div className="faint" style={{ fontSize: 11.5 }}>
+                  {priceMode === 'unit'
+                    ? `Total: ${fmtMoney(derivedPreview.total)}`
+                    : `Per unit: ${fmtMoney(derivedPreview.unit)}`}
+                </div>
+              )}
             </div>
           </div>
           <div className="field">
@@ -190,6 +270,17 @@ export function StockTxnModal({
           </button>
         </div>
       </form>
+      {addingBatch && medicine && (
+        <BatchFormModal
+          medicineId={medicine.id}
+          medicineName={medicine.name}
+          onClose={() => setAddingBatch(false)}
+          onCreated={(batch) => {
+            setBatchId(batch.id);
+            setAddingBatch(false);
+          }}
+        />
+      )}
     </Modal>
   );
 }

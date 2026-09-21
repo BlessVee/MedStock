@@ -40,17 +40,36 @@ export async function listTransactionsForBatchIds(batchIds: string[]): Promise<T
   return data;
 }
 
+export type PriceEntryMode = 'unit' | 'total';
+
 export interface StockTxnInput {
   batch_id: string;
   type: Extract<TransactionType, 'IN' | 'OUT'>;
   quantity: number;
-  price: number;
+  priceMode: PriceEntryMode;
+  priceValue: number;
   reference: string;
   notes: string;
 }
 
+// Whichever value staff enter (per-unit or total) is stored exactly as
+// given; the other is derived from quantity and rounded to cents. Both are
+// always persisted so the ledger never has to recompute one from the other
+// later on.
+export function deriveUnitAndTotal(
+  mode: PriceEntryMode,
+  value: number,
+  quantity: number,
+): { unit: number; total: number } {
+  if (mode === 'unit') {
+    return { unit: value, total: Math.round(value * quantity * 100) / 100 };
+  }
+  return { unit: Math.round((value / quantity) * 100) / 100, total: value };
+}
+
 export async function createStockTransaction(input: StockTxnInput): Promise<void> {
   const createdBy = await requireUserId();
+  const { unit, total } = deriveUnitAndTotal(input.priceMode, input.priceValue, input.quantity);
   const payload: Partial<Transaction> = {
     batch_id: input.batch_id,
     type: input.type,
@@ -59,8 +78,13 @@ export async function createStockTransaction(input: StockTxnInput): Promise<void
     notes: input.notes || null,
     created_by: createdBy,
   };
-  if (input.type === 'IN') payload.cost_price = input.price;
-  else payload.sale_price = input.price;
+  if (input.type === 'IN') {
+    payload.unit_cost_price = unit;
+    payload.total_cost_price = total;
+  } else {
+    payload.unit_sale_price = unit;
+    payload.total_sale_price = total;
+  }
 
   const { error } = await supabase.from('transactions').insert(payload);
   if (error) throw error;

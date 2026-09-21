@@ -19,9 +19,10 @@ export interface BatchFormInput {
   expiry_date: string;
 }
 
-export async function createBatch(input: BatchFormInput): Promise<void> {
-  const { error } = await supabase.from('batches').insert(input);
+export async function createBatch(input: BatchFormInput): Promise<Batch> {
+  const { data, error } = await supabase.from('batches').insert(input).select().single();
   if (error) throw error;
+  return data;
 }
 
 export async function archiveBatch(id: string): Promise<void> {
@@ -63,11 +64,6 @@ export async function batchHasTransactions(id: string): Promise<boolean> {
     .eq('batch_id', id);
   if (error) throw error;
   return (count ?? 0) > 0;
-}
-
-export async function deleteBatchDirect(id: string): Promise<void> {
-  const { error } = await supabase.from('batches').delete().eq('id', id);
-  if (error) throw error;
 }
 
 export async function hardDeleteBatch(id: string): Promise<void> {
