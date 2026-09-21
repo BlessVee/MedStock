@@ -108,6 +108,59 @@ export async function createWriteOff(input: WriteOffInput): Promise<void> {
   if (error) throw error;
 }
 
+export interface UpdateStockTxnInput {
+  id: string;
+  type: Extract<TransactionType, 'IN' | 'OUT'>;
+  quantity: number;
+  priceMode: PriceEntryMode;
+  priceValue: number;
+  reference: string;
+  notes: string;
+}
+
+// Transactions are editable (see schema grants), but batch/medicine can't be
+// changed here — only quantity, price, reference and notes. Every edit is
+// captured by the transactions_audit_update trigger.
+export async function updateStockTransaction(input: UpdateStockTxnInput): Promise<void> {
+  const { unit, total } = deriveUnitAndTotal(input.priceMode, input.priceValue, input.quantity);
+  const payload: Partial<Transaction> = {
+    quantity: input.quantity,
+    reference: input.reference || null,
+    notes: input.notes || null,
+  };
+  if (input.type === 'IN') {
+    payload.unit_cost_price = unit;
+    payload.total_cost_price = total;
+  } else {
+    payload.unit_sale_price = unit;
+    payload.total_sale_price = total;
+  }
+
+  const { error } = await supabase.from('transactions').update(payload).eq('id', input.id);
+  if (error) throw error;
+}
+
+export interface UpdateWriteOffInput {
+  id: string;
+  quantity: number;
+  notes: string;
+}
+
+export async function updateWriteOff(input: UpdateWriteOffInput): Promise<void> {
+  const { error } = await supabase
+    .from('transactions')
+    .update({ quantity: input.quantity, notes: input.notes || null })
+    .eq('id', input.id);
+  if (error) throw error;
+}
+
+// Deletes any transaction (IN/OUT/WRITE_OFF); captured by
+// transactions_audit_delete.
+export async function deleteTransaction(id: string): Promise<void> {
+  const { error } = await supabase.from('transactions').delete().eq('id', id);
+  if (error) throw error;
+}
+
 async function requireUserId(): Promise<string> {
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) throw new Error('Not signed in.');

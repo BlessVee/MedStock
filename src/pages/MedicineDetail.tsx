@@ -7,14 +7,16 @@ import { BatchFormModal } from '../components/BatchFormModal';
 import { StockTxnModal } from '../components/StockTxnModal';
 import { WriteOffModal } from '../components/WriteOffModal';
 import { BlockedDeleteModal } from '../components/BlockedDeleteModal';
+import { EditTransactionModal } from '../components/EditTransactionModal';
 import { useBatchActions } from '../hooks/useBatchActions';
-import { listTransactionsForBatchIds } from '../services/transactions';
+import { deleteTransaction, listTransactionsForBatchIds } from '../services/transactions';
 import type { Transaction, Batch } from '../types/database';
 import { TXN_TYPE } from '../domain/status';
 import { addDays, fmtDateTime, todayStr } from '../utils/date';
 import { fmtMoney } from '../utils/format';
 import { exportCSV } from '../utils/csv';
 import { useToast } from '../context/ToastContext';
+import { useConfirm } from '../context/ConfirmContext';
 import { friendlyError } from '../lib/errors';
 
 type TxnModalState = { type: 'IN' | 'OUT'; batchId: string } | null;
@@ -25,6 +27,7 @@ export function MedicineDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const confirm = useConfirm();
   const {
     medicineById,
     batchesForMedicine,
@@ -46,15 +49,37 @@ export function MedicineDetail() {
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [editingTxn, setEditingTxn] = useState<Transaction | null>(null);
 
-  useEffect(() => {
+  function loadTransactions() {
     if (!id) return;
     const allBatchIds = batchesForMedicine(id, false).map((b: Batch) => b.id);
     listTransactionsForBatchIds(allBatchIds)
       .then(setTransactions)
       .catch((err) => toast('error', friendlyError(err, 'Could not load transaction history.')));
+  }
+
+  useEffect(() => {
+    loadTransactions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, batches.length]);
+
+  async function handleDeleteTxn(t: Transaction) {
+    const ok = await confirm({
+      title: 'Delete transaction?',
+      message: `Permanently delete this ${TXN_TYPE[t.type].label} of ${t.quantity}? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+    });
+    if (!ok) return;
+    try {
+      await deleteTransaction(t.id);
+      toast('success', 'Transaction deleted.');
+      loadTransactions();
+    } catch (err) {
+      toast('error', friendlyError(err));
+    }
+  }
 
   const batchNumberById = useMemo(() => {
     const all = id ? batchesForMedicine(id, false) : [];
@@ -329,7 +354,7 @@ export function MedicineDetail() {
         </div>
       )}
       <div className="card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
-        <table className="data-table" style={{ minWidth: 820 }}>
+        <table className="data-table" style={{ minWidth: 920 }}>
           <thead>
             <tr>
               <th>Date</th>
@@ -340,6 +365,7 @@ export function MedicineDetail() {
               <th className="num">Total Price</th>
               <th>Reference</th>
               <th>Notes</th>
+              <th className="num">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -359,6 +385,20 @@ export function MedicineDetail() {
                   <td className="num mono">{fmtMoney(h.totalPrice)}</td>
                   <td className="muted">{h.reference ?? '—'}</td>
                   <td className="muted">{h.notes ?? ''}</td>
+                  <td>
+                    <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+                      <button className="btn-ghost" onClick={() => setEditingTxn(h)}>
+                        Edit
+                      </button>
+                      <button
+                        className="btn-ghost"
+                        style={{ color: 'var(--bad-text)' }}
+                        onClick={() => handleDeleteTxn(h)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               );
             })}
@@ -396,6 +436,16 @@ export function MedicineDetail() {
           entityLabel={blocked.entityLabel}
           onArchive={blocked.onArchive}
           onClose={closeBlocked}
+        />
+      )}
+      {editingTxn && (
+        <EditTransactionModal
+          transaction={editingTxn}
+          batchLabel={batchNumberById.get(editingTxn.batch_id) ?? '—'}
+          onClose={() => {
+            setEditingTxn(null);
+            loadTransactions();
+          }}
         />
       )}
     </div>

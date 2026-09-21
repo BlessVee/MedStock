@@ -72,7 +72,8 @@ create unique index batches_active_medicine_batch_key
 
 
 -- =====================================================
--- 4. TRANSACTIONS (append-only ledger)
+-- 4. TRANSACTIONS (the ledger — editable/deletable, see grants below;
+-- no longer strictly append-only, but every change is audited)
 -- =====================================================
 
 -- WRITE_OFF behaves like OUT for stock math, but marks the reduction
@@ -114,12 +115,22 @@ create table public.audit_log (
   new_data    jsonb
 );
 
+-- Handles both UPDATE (old_data + new_data) and DELETE (old_data only,
+-- new_data null) so it can also back the transactions edit/delete audit
+-- trail below — transactions are otherwise append-only, so every edit or
+-- delete MUST leave a permanent record here of what it used to be.
 create or replace function public.log_audit_change()
 returns trigger as $$
 begin
-  insert into public.audit_log (table_name, record_id, changed_by, old_data, new_data)
-  values (TG_TABLE_NAME, OLD.id, auth.uid(), to_jsonb(OLD), to_jsonb(NEW));
-  return NEW;
+  if TG_OP = 'DELETE' then
+    insert into public.audit_log (table_name, record_id, changed_by, old_data, new_data)
+    values (TG_TABLE_NAME, OLD.id, auth.uid(), to_jsonb(OLD), null);
+    return OLD;
+  else
+    insert into public.audit_log (table_name, record_id, changed_by, old_data, new_data)
+    values (TG_TABLE_NAME, OLD.id, auth.uid(), to_jsonb(OLD), to_jsonb(NEW));
+    return NEW;
+  end if;
 end;
 $$ language plpgsql security definer;
 
@@ -129,6 +140,17 @@ for each row execute function public.log_audit_change();
 
 create trigger batches_audit
 after update on public.batches
+for each row execute function public.log_audit_change();
+
+-- Transactions are otherwise insert-only; staff CAN edit/delete them (see
+-- grants below), but every change is captured here so the ledger stays
+-- fully traceable even though it is no longer strictly immutable.
+create trigger transactions_audit_update
+after update on public.transactions
+for each row execute function public.log_audit_change();
+
+create trigger transactions_audit_delete
+after delete on public.transactions
 for each row execute function public.log_audit_change();
 
 -- Auto-stamp who last edited a medicine and when
@@ -256,13 +278,17 @@ create policy "batches_select" on public.batches for select to authenticated usi
 create policy "batches_insert" on public.batches for insert to authenticated with check (true);
 create policy "batches_update" on public.batches for update to authenticated using (true) with check (true);
 
--- Transactions: the ledger. INSERT only — no update or delete grant
--- exists for anyone. This is what makes it genuinely append-only,
--- not just append-only by UI convention.
+-- Transactions: the ledger. Any staff member may edit or delete any
+-- transaction at any time (no per-user or time-window restriction) — the
+-- append-only guarantee this used to have is now enforced only via the
+-- audit_log trigger above, not via RLS. Every edit/delete is recorded
+-- there, so the ledger is fully traceable even though it is mutable.
 alter table public.transactions enable row level security;
-grant select, insert on public.transactions to authenticated;
+grant select, insert, update, delete on public.transactions to authenticated;
 create policy "transactions_select" on public.transactions for select to authenticated using (true);
 create policy "transactions_insert" on public.transactions for insert to authenticated with check (true);
+create policy "transactions_update" on public.transactions for update to authenticated using (true) with check (true);
+create policy "transactions_delete" on public.transactions for delete to authenticated using (true);
 
 -- Audit log: read-only for staff. Only the security-definer trigger
 -- function (log_audit_change) ever writes to it.

@@ -1,20 +1,28 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PageHeader } from '../components/PageHeader';
 import { StockTxnModal } from '../components/StockTxnModal';
-import { listLedgerTransactions, type TransactionWithNames } from '../services/transactions';
+import { EditTransactionModal } from '../components/EditTransactionModal';
+import {
+  deleteTransaction,
+  listLedgerTransactions,
+  type TransactionWithNames,
+} from '../services/transactions';
 import { TXN_TYPE } from '../domain/status';
 import { fmtDateTime } from '../utils/date';
 import { fmtMoney } from '../utils/format';
 import { exportCSV } from '../utils/csv';
 import { useToast } from '../context/ToastContext';
+import { useConfirm } from '../context/ConfirmContext';
 import { friendlyError } from '../lib/errors';
 
 export function Ledger() {
   const { toast } = useToast();
+  const confirm = useConfirm();
   const [rows, setRows] = useState<TransactionWithNames[]>([]);
   const [search, setSearch] = useState('');
   const [type, setType] = useState('all');
   const [modal, setModal] = useState<'IN' | 'OUT' | null>(null);
+  const [editing, setEditing] = useState<TransactionWithNames | null>(null);
 
   function load() {
     listLedgerTransactions()
@@ -67,6 +75,23 @@ export function Ledger() {
     );
   }
 
+  async function handleDelete(t: TransactionWithNames) {
+    const ok = await confirm({
+      title: 'Delete transaction?',
+      message: `Permanently delete this ${TXN_TYPE[t.type].label} of ${t.quantity} for ${t.batch?.medicine?.name ?? 'this medicine'}? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+    });
+    if (!ok) return;
+    try {
+      await deleteTransaction(t.id);
+      toast('success', 'Transaction deleted.');
+      load();
+    } catch (err) {
+      toast('error', friendlyError(err));
+    }
+  }
+
   return (
     <div>
       <PageHeader
@@ -104,7 +129,7 @@ export function Ledger() {
       </div>
 
       <div className="card" style={{ overflow: 'hidden', overflowX: 'auto' }}>
-        <table className="data-table" style={{ minWidth: 1000 }}>
+        <table className="data-table" style={{ minWidth: 1100 }}>
           <thead>
             <tr>
               <th>Date</th>
@@ -116,6 +141,7 @@ export function Ledger() {
               <th className="num">Total Price</th>
               <th>Reference</th>
               <th>Notes</th>
+              <th className="num">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -138,6 +164,20 @@ export function Ledger() {
                   <td className="num mono">{fmtMoney(totalPrice)}</td>
                   <td className="muted">{t.reference ?? '—'}</td>
                   <td className="muted">{t.notes ?? ''}</td>
+                  <td>
+                    <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+                      <button className="btn-ghost" onClick={() => setEditing(t)}>
+                        Edit
+                      </button>
+                      <button
+                        className="btn-ghost"
+                        style={{ color: 'var(--bad-text)' }}
+                        onClick={() => handleDelete(t)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               );
             })}
@@ -153,6 +193,16 @@ export function Ledger() {
           txnType={modal}
           onClose={() => {
             setModal(null);
+            load();
+          }}
+        />
+      )}
+      {editing && (
+        <EditTransactionModal
+          transaction={editing}
+          batchLabel={`${editing.batch?.medicine?.name ?? '—'} · ${editing.batch?.batch_number ?? '—'}`}
+          onClose={() => {
+            setEditing(null);
             load();
           }}
         />
